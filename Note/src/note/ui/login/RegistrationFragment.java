@@ -22,7 +22,6 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	private Button Registration;
 
 	API api = new API();
-	MainActivity m = new MainActivity();
 	
 	MyAsyncTask mt;
 	

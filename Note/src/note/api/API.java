@@ -20,11 +20,11 @@ public class API {
 
 	public boolean setUser(String login, String password) {
 
-		try {
-			TimeUnit.SECONDS.sleep(7);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			TimeUnit.SECONDS.sleep(7);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 
 		boolean userCreate = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
@@ -41,11 +41,11 @@ public class API {
 	}
 
 	public boolean checkUser(String login, String password) {
-		try {
-			TimeUnit.SECONDS.sleep(7);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			TimeUnit.SECONDS.sleep(7);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		boolean userExists = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
 		for (int i = 0; i < mUsers.size(); i++) {
@@ -96,18 +96,27 @@ public class API {
 		return result;
 	}
 
-	private void a() {
-		String result = "{result:0,sessionID:426261}";
-		try {
-			JSONObject obj = new JSONObject(result);
-			String sessionId = obj.getString("sessionID");
-			int status = obj.getInt("result");
+	public static class LoginResponse {
+		public int result;
+	 	public String sessionId;
 
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		public LoginResponse() {
+		}
+
+		public LoginResponse(JSONObject json) throws JSONException {
+			result = json.getInt("result");
+			sessionId = json.getString("sessionID");
 		}
 	}
+
+	public LoginResponse login(String login, String password)
+			throws JSONException {
+
+		String rawResponse = GET("http://10.0.3.2:8080/Note/REST/login?login="
+				+ login + "&pass=" + password);
+		return new LoginResponse(new JSONObject(rawResponse));
+	}
+
 
 	// convert inputstream to String
 	private static String convertInputStreamToString(InputStream inputStream)

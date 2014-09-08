@@ -8,14 +8,16 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
+        
         android:name="note.MyApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="note.MainActivity"
+            android:name="note.ui.login.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,15 +26,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="note.NoteActivity"
+            android:name="note.ui.note.NoteActivity"
             android:label="Note" >
         </activity>
         <activity
-            android:name="note.ChengPasswordActivity"
+            android:name="note.note.ChengPasswordActivity"
             android:label="@string/action_changePassword" >
         </activity>
         <activity
-            android:name="note.NewNoteActivity"
+            android:name="note.note.NewNoteActivity"
             android:label="@string/action_addNoteIcon" >
         </activity>
         <activity

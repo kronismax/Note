@@ -1,7 +1,10 @@
 package note.ui.login;
 
+import org.json.JSONException;
+
 import note.MyApplication;
 import note.api.API;
+import note.api.API.LoginResponse;
 import note.ui.note.NoteActivity;
 import android.app.Fragment;
 import android.content.Context;
@@ -16,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.example.note.R;
@@ -55,9 +59,22 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	public void onClick(View arg0) {
-		Login.setEnabled(false);
-		mt = new MyAsyncTask();
-		mt.execute();
+		final String LOGIN = LogText.getText().toString();
+		final String PASS = PassText.getText().toString();
+		if (LOGIN.isEmpty() || PASS.isEmpty()) {
+			Toast toast = Toast.makeText(getActivity(),
+					"Введите логин или пароль", Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.BOTTOM, 10, 50);
+			toast.show();
+		} else {
+			LoginRequest request = new LoginRequest();
+			request.login = LOGIN;
+			request.password = PASS;
+			
+			Login.setEnabled(false);
+			mt = new MyAsyncTask();
+			mt.execute(request);
+		}
 	}
 
 	private void saveLastLogin() {
@@ -67,33 +84,42 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		editor.commit();
 	}
 
-	public class MyAsyncTask extends AsyncTask<Void, Void, Void> {
+	public static class LoginRequest {
+		String login;
+		String password;
+
+	}
+
+	public class MyAsyncTask extends
+			AsyncTask<LoginRequest, Void, LoginResponse> {
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected LoginResponse doInBackground(LoginRequest... params) {
+
+			try {
+				return new API().login(params[0].login, params[0].password);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return null;
 		}
 
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(LoginResponse result) {
 			super.onPostExecute(result);
 
-			final String LOGIN = LogText.getText().toString();
-			final String PASS = PassText.getText().toString();
-			if (LOGIN.equals("") || PASS.equals("")) {
-				Toast toast = Toast.makeText(getActivity(),"Введите логин или пароль", Toast.LENGTH_SHORT);
+			if (result.result == 0) {
+				((MyApplication) getActivity().getApplication()).getLocalData()
+						.setSessionID(result.sessionId);
+				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT)
+						.show();
+				saveLastLogin();
+				Intent intent = new Intent(getActivity(), NoteActivity.class);
+				startActivity(intent);
+			} else {
+				Toast toast = Toast.makeText(getActivity(),
+						"Неправильный логин ии пароль", Toast.LENGTH_SHORT);
 				toast.setGravity(Gravity.BOTTOM, 10, 50);
 				toast.show();
-			} else {
-				if (api.checkUser(LOGIN, PASS)) {
-					((MyApplication) getActivity().getApplication()).getLocalData().setSessionID(LOGIN);
-					Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
-					saveLastLogin();
-					Intent intent = new Intent(getActivity(),NoteActivity.class);
-					startActivity(intent);
-				} else {
-					Toast toast = Toast.makeText(getActivity(),"Неправильный логин ии пароль", Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.BOTTOM, 10, 50);
-					toast.show();
-				}
 			}
 			Login.setEnabled(true);
 		}
