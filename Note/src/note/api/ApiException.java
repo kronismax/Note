@@ -2,18 +2,18 @@ package note.api;
 
 public class ApiException extends Exception {
 
-	public enum Error {
-		ERROR_CONNECTION, ERROR_SERVER, ERROR_JSON, ERROR
+	public enum TypeOfError {
+		ERROR_CONNECTION, ERROR_JSON, ERROR
 	};
 
-	final Error typeOfError;
+	static TypeOfError typeOfError;
 
-	public Error getError() {
+	public TypeOfError getError() {
 		return typeOfError;
 	}
 
-	public ApiException(Error tOfEr, Throwable throwable) {
+	public ApiException(TypeOfError typeOfError, Throwable throwable) {
 		super(throwable);
-		typeOfError = tOfEr;
+		this.typeOfError = typeOfError;
 	}
 }

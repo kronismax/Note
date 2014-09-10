@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
 import note.remote.DataBaseUsers;
 import note.remote.RemoteUser;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -74,7 +72,7 @@ public class API {
 		DataBaseUsers.getInstance().setNote(LOGIN, NOTE, NOTE_TITLE_NOTE);
 	}
 
-	public static String GET(String url) {
+	public static String GET(String url) throws ApiException {
 		InputStream inputStream = null;
 		String result = "";
 		try {
@@ -94,6 +92,7 @@ public class API {
 				result = "Did not work!";
 		} catch (Exception e) {
 			Log.d("InputStream", e.getLocalizedMessage());
+			throw new ApiException(ApiException.typeOfError.ERROR_CONNECTION, e);
 		}
 		return result;
 	}
@@ -115,30 +114,37 @@ public class API {
 		}
 	}
 
-	public LoginResponse login(String login, String password)
-			throws JSONException {
-
-		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login="
-				+ login + "&pass=" + password);
-		return new LoginResponse(new JSONObject(rawResponse));
+	public LoginResponse login(String login, String password) throws ApiException{
+		try {
+			String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login="+ login + "&pass=" + password);
+			return new LoginResponse(new JSONObject(rawResponse));
+		} catch (JSONException e) {
+			throw new ApiException(ApiException.typeOfError.ERROR_JSON, e);
+		}
 	}
 	
-	public RegisterResponse register(String login, String password)
-			throws JSONException {
-
+	public RegisterResponse register(String login, String password) throws ApiException{
 		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/register?login="+ login + "&pass=" + password);
-		return new RegisterResponse(new JSONObject(rawResponse));
+		try {
+			return new RegisterResponse(new JSONObject(rawResponse));
+		} catch (JSONException e) {
+			throw new ApiException(ApiException.typeOfError.ERROR_JSON, e);
+		}
 	}
 
 	public static class RegisterResponse {
+		
 		public int result;
 
 		public RegisterResponse() {
 		}
 
-		public RegisterResponse(JSONObject json) throws JSONException {
-			result = json.getInt("result");
-			
+		public RegisterResponse(JSONObject json) throws ApiException {
+			try {
+				result = json.getInt("result");
+			} catch (JSONException e) {
+				throw new ApiException(ApiException.typeOfError.ERROR_JSON, e);
+			}
 		}
 	}
 
@@ -149,11 +155,10 @@ public class API {
 				new InputStreamReader(inputStream));
 		String line = "";
 		String result = "";
-		while ((line = bufferedReader.readLine()) != null)
+		while ((line = bufferedReader.readLine()) != null) {
 			result += line;
-
+		}
 		inputStream.close();
 		return result;
 	}
-
 }
