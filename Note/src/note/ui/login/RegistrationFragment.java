@@ -1,6 +1,11 @@
 package note.ui.login;
 
+import org.json.JSONException;
+
 import note.api.API;
+import note.api.API.RegisterResponse;
+import note.ui.login.LoginFragment.LoginRequest;
+import note.ui.login.LoginFragment.MyAsyncTask;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,30 +49,93 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	}
 
 	public void onClick(View arg0) {
-		Registration.setEnabled(false);
-		mt = new MyAsyncTask();
-		mt.execute();
+
+		final String LOGIN = LogText.getText().toString();
+		final String PASS = PassText.getText().toString();
+		final String REPEATPASS = RepeatPassText.getText().toString();
+		if ((PASS.equals(REPEATPASS) && !TextUtils.isEmpty(LOGIN)
+				&& !TextUtils.isEmpty(PASS) && !TextUtils.isEmpty(REPEATPASS))) {
+
+			RegisterRequest request = new RegisterRequest();
+			request.login = LOGIN;
+			request.password = PASS;
+
+			Registration.setEnabled(false);
+			mt = new MyAsyncTask();
+			mt.execute(request);
+
+			Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
+			getActivity().getActionBar().setSelectedNavigationItem(0);
+
+		} else {
+
+			Toast.makeText(getActivity(), "Введите корректные данные",Toast.LENGTH_SHORT).show();
+		}
+
+//		Registration.setEnabled(false);
+//		mt = new MyAsyncTask();
+//		mt.execute();
+	}
+
+	public static class RegisterRequest {
+		String login;
+		String password;
+
 	}
 	
-	public class MyAsyncTask extends AsyncTask<Void, Void, Void> {
+	
+	
+	public class MyAsyncTask extends AsyncTask<RegisterRequest, Void, RegisterResponse> {
+		
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected RegisterResponse doInBackground(RegisterRequest... params) {
+			try {
+				return new API().register(params[0].login, params[0].password);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return null;
 		}
 
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(RegisterResponse result) {
 			super.onPostExecute(result);
-			final String LOGIN = LogText.getText().toString();
-			final String PASS = PassText.getText().toString();
-			final String REPEATPASS = RepeatPassText.getText().toString();
-			if (api.setUser(LOGIN, PASS) && PASS.equals(REPEATPASS)
-					&& !TextUtils.isEmpty(LOGIN) && !TextUtils.isEmpty(PASS)
-					&& !TextUtils.isEmpty(REPEATPASS)) {
-				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
-				getActivity().getActionBar().setSelectedNavigationItem(0);
-			} else {
-				Toast.makeText(getActivity(), "Введите корректные данные",Toast.LENGTH_SHORT).show();
-			}
+		
 		}
 	}
 }
+
+
+
+/*public class MyAsyncTask extends AsyncTask<LoginRequest, Void, LoginResponse> {
+	@Override
+	protected LoginResponse doInBackground(LoginRequest... params) {
+
+		try {
+			return new API().login(params[0].login, params[0].password);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	protected void onPostExecute(LoginResponse result) {
+		super.onPostExecute(result);
+
+		if (result.result == 0) {
+			((MyApplication) getActivity().getApplication()).getLocalData()
+					.setSessionID(result.sessionId);
+			Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
+			saveLastLogin();
+			Intent intent = new Intent(getActivity(), NoteActivity.class);
+			startActivity(intent);
+		} else {
+			Toast toast = Toast.makeText(getActivity(),
+					"Неправильный логин ии пароль", Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.BOTTOM, 10, 50);
+			toast.show();
+		}
+		Login.setEnabled(true);
+	}
+} */

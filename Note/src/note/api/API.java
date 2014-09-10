@@ -5,15 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+
 import note.remote.DataBaseUsers;
 import note.remote.RemoteUser;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.util.Log;
 
 public class API {
@@ -100,6 +102,10 @@ public class API {
 		public int result;
 	 	public String sessionId;
 
+	 	public int getResult() {
+			return result;
+	 	}
+	 	
 		public LoginResponse() {
 		}
 
@@ -112,11 +118,29 @@ public class API {
 	public LoginResponse login(String login, String password)
 			throws JSONException {
 
-		String rawResponse = GET("http://10.0.3.2:8080/Note/REST/login?login="
+		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login="
 				+ login + "&pass=" + password);
 		return new LoginResponse(new JSONObject(rawResponse));
 	}
+	
+	public RegisterResponse register(String login, String password)
+			throws JSONException {
 
+		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/register?login="+ login + "&pass=" + password);
+		return new RegisterResponse(new JSONObject(rawResponse));
+	}
+
+	public static class RegisterResponse {
+		public int result;
+
+		public RegisterResponse() {
+		}
+
+		public RegisterResponse(JSONObject json) throws JSONException {
+			result = json.getInt("result");
+			
+		}
+	}
 
 	// convert inputstream to String
 	private static String convertInputStreamToString(InputStream inputStream)
@@ -131,4 +155,5 @@ public class API {
 		inputStream.close();
 		return result;
 	}
+
 }
