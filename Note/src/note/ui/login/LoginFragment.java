@@ -1,5 +1,6 @@
 package note.ui.login;
 
+import utils.UIUtils;
 import note.MyApplication;
 import note.api.API;
 import note.api.API.LoginResponse;
@@ -26,14 +27,14 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 	private EditText LogText;
 	private EditText PassText;
-	private Button   Login;
+	private Button Login;
 	private static final String PREF_SETTINGS = "Settings";
 	API api = new API();
-	
+
 	MyAsyncTask mt;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstance) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
 		return inflater.inflate(R.layout.log_frag, container, false);
 	}
 
@@ -60,14 +61,14 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		final String LOGIN = LogText.getText().toString();
 		final String PASS = PassText.getText().toString();
 		if (LOGIN.isEmpty() || PASS.isEmpty()) {
-			Toast toast = Toast.makeText(getActivity(),"Введите логин или пароль", Toast.LENGTH_SHORT);
+			Toast toast = Toast.makeText(getActivity(), "Введите логин или пароль", Toast.LENGTH_SHORT);
 			toast.setGravity(Gravity.BOTTOM, 10, 50);
 			toast.show();
 		} else {
 			LoginRequest request = new LoginRequest();
 			request.login = LOGIN;
 			request.password = PASS;
-			
+
 			Login.setEnabled(false);
 			mt = new MyAsyncTask();
 			mt.execute(request);
@@ -88,12 +89,15 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	public class MyAsyncTask extends AsyncTask<LoginRequest, Void, LoginResponse> {
+
+		ApiException exception;
+
 		@Override
 		protected LoginResponse doInBackground(LoginRequest... params) {
 			try {
 				return new API().login(params[0].login, params[0].password);
 			} catch (ApiException apIexception) {
-				apIexception.printStackTrace();
+				exception = apIexception;
 			}
 			return null;
 		}
@@ -101,16 +105,24 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		protected void onPostExecute(LoginResponse result) {
 			super.onPostExecute(result);
 
-			if (result.getResult() == 0) {
-				((MyApplication) getActivity().getApplication()).getLocalData().setSessionID(result.sessionId);
-				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
-				saveLastLogin();
-				Intent intent = new Intent(getActivity(), NoteActivity.class);
-				startActivity(intent);
+			if (result == null) {
+				UIUtils.showToastByException(getActivity(), exception);
 			} else {
-				Toast toast = Toast.makeText(getActivity(),"Неправильный логин ии пароль", Toast.LENGTH_SHORT);
-				toast.setGravity(Gravity.BOTTOM, 10, 50);
-				toast.show();
+				if (result.getResult() == 0) {
+					((MyApplication) getActivity().getApplication()).getLocalData().setSessionID(result.sessionId);
+					Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
+					saveLastLogin();
+					Intent intent = new Intent(getActivity(), NoteActivity.class);
+					startActivity(intent);
+				} else if (result.getResult() == 1) {
+					Toast toast = Toast.makeText(getActivity(), "Неправильный логин ии пароль", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.BOTTOM, 10, 50);
+					toast.show();
+				} else {
+					Toast toast = Toast.makeText(getActivity(), "Что то не так", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.BOTTOM, 10, 50);
+					toast.show();
+				}
 			}
 			Login.setEnabled(true);
 		}

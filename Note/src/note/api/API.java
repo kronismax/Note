@@ -20,19 +20,21 @@ public class API {
 
 	public boolean setUser(String login, String password) {
 
-//		try {
-//			TimeUnit.SECONDS.sleep(7);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		// try {
+		// TimeUnit.SECONDS.sleep(7);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 
 		boolean userCreate = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
-		if (mUsers.isEmpty()) { DataBaseUsers.getInstance().setUsers(new RemoteUser(login, password));
+		if (mUsers.isEmpty()) {
+			DataBaseUsers.getInstance().setUsers(new RemoteUser(login, password));
 			userCreate = true;
 		} else {
 			for (int i = 0; i < mUsers.size(); i++) {
-				if (!mUsers.get(i).login.equals(login)) { DataBaseUsers.getInstance().setUsers(new RemoteUser(login, password));
+				if (!mUsers.get(i).login.equals(login)) {
+					DataBaseUsers.getInstance().setUsers(new RemoteUser(login, password));
 					userCreate = true;
 				}
 			}
@@ -41,26 +43,26 @@ public class API {
 	}
 
 	public boolean checkUser(String login, String password) {
-//		try {
-//			TimeUnit.SECONDS.sleep(7);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		// try {
+		// TimeUnit.SECONDS.sleep(7);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 		boolean userExists = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
 		for (int i = 0; i < mUsers.size(); i++) {
-			if (mUsers.get(i).login.equals(login)&& mUsers.get(i).password.equals(password)) {
+			if (mUsers.get(i).login.equals(login) && mUsers.get(i).password.equals(password)) {
 				userExists = true;
 			}
 		}
 		return userExists;
 	}
 
-	public boolean chengPassword(String login, String password,String oldPassword) {
+	public boolean chengPassword(String login, String password, String oldPassword) {
 		boolean chengPassword = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
 		for (int i = 0; i < mUsers.size(); i++) {
-			if (mUsers.get(i).login.equals(login)&& mUsers.get(i).password.equals(oldPassword)) {
+			if (mUsers.get(i).login.equals(login) && mUsers.get(i).password.equals(oldPassword)) {
 				DataBaseUsers.getInstance().setUsersChengPassword(i, new RemoteUser(login, password));
 				chengPassword = true;
 			}
@@ -78,16 +80,17 @@ public class API {
 		try {
 			// create HttpClient
 			HttpClient httpclient = new DefaultHttpClient();
-
+			Log.d("tets", "client");
 			// make GET request to the given URL
 			HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-
+			Log.d("tets", "client response");
 			// receive response as inputStream
 			inputStream = httpResponse.getEntity().getContent();
-
+			Log.d("tets", "stream");
 			// convert inputstream to string
 			if (inputStream != null) {
 				result = convertInputStreamToString(inputStream); //
+				Log.d("tets", "convert stream");
 			} else
 				result = "Did not work!";
 		} catch (Exception e) {
@@ -99,12 +102,12 @@ public class API {
 
 	public static class LoginResponse {
 		public int result;
-	 	public String sessionId;
+		public String sessionId;
 
-	 	public int getResult() {
+		public int getResult() {
 			return result;
-	 	}
-	 	
+		}
+
 		public LoginResponse() {
 		}
 
@@ -114,17 +117,19 @@ public class API {
 		}
 	}
 
-	public LoginResponse login(String login, String password) throws ApiException{
+	public LoginResponse login(String login, String password) throws ApiException {
 		try {
-			String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login="+ login + "&pass=" + password);
+			String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login=" + login + "&pass=" + password);
 			return new LoginResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
 			throw new ApiException(ApiException.typeOfError.ERROR_JSON, e);
 		}
 	}
-	
-	public RegisterResponse register(String login, String password) throws ApiException{
-		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/register?login="+ login + "&pass=" + password);
+
+	public RegisterResponse register(String login, String password) throws ApiException {
+		Log.d("tets", "register");
+		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/register?login=" + login + "&pass=" + password);
+		Log.d("tets", "response");
 		try {
 			return new RegisterResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
@@ -133,7 +138,7 @@ public class API {
 	}
 
 	public static class RegisterResponse {
-		
+
 		public int result;
 
 		public RegisterResponse() {
@@ -149,10 +154,8 @@ public class API {
 	}
 
 	// convert inputstream to String
-	private static String convertInputStreamToString(InputStream inputStream)
-			throws IOException {
-		BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(inputStream));
+	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		String line = "";
 		String result = "";
 		while ((line = bufferedReader.readLine()) != null) {
