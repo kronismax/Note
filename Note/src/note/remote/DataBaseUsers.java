@@ -3,9 +3,9 @@ package note.remote;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import note.remote.RemoteNote;
 import note.remote.RemoteUser;
+
 @Deprecated
 public class DataBaseUsers {
 	private ArrayList<RemoteUser> mUsers = new ArrayList<RemoteUser>();

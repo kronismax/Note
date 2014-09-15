@@ -1,16 +1,14 @@
 package note.ui.login;
 
-import org.json.JSONException;
-
 import note.api.API;
 import note.api.ApiException;
 import note.api.API.RegisterResponse;
-import note.ui.login.LoginFragment.LoginRequest;
-import note.ui.login.LoginFragment.MyAsyncTask;
+import note.utils.UIUtils;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +26,11 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	private Button Registration;
 
 	API api = new API();
-	
+
 	MyAsyncTask mt;
-	
+
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstance) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
 		return inflater.inflate(R.layout.register_frag, container, false);
 	}
 
@@ -41,12 +38,12 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	public void onViewCreated(View view, Bundle saveInstanceState) {
 		super.onViewCreated(view, saveInstanceState);
 
-		LogText        = (EditText) view.findViewById(R.id.logText);
-		PassText       = (EditText) view.findViewById(R.id.passText);
+		LogText = (EditText) view.findViewById(R.id.logText);
+		PassText = (EditText) view.findViewById(R.id.passText);
 		RepeatPassText = (EditText) view.findViewById(R.id.repeatPassText);
-		Registration   = (Button) view.findViewById(R.id.button1);
+		Registration = (Button) view.findViewById(R.id.button1);
 		Registration.setOnClickListener(this);
-		
+
 	}
 
 	public void onClick(View arg0) {
@@ -54,7 +51,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 		final String LOGIN = LogText.getText().toString();
 		final String PASS = PassText.getText().toString();
 		final String REPEATPASS = RepeatPassText.getText().toString();
-		if ((PASS.equals(REPEATPASS) && !TextUtils.isEmpty(LOGIN)&& !TextUtils.isEmpty(PASS) && !TextUtils.isEmpty(REPEATPASS))) {
+		if ((PASS.equals(REPEATPASS) && !TextUtils.isEmpty(LOGIN) && !TextUtils.isEmpty(PASS) && !TextUtils.isEmpty(REPEATPASS))) {
 			RegisterRequest request = new RegisterRequest();
 			request.login = LOGIN;
 			request.password = PASS;
@@ -62,11 +59,8 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 			Registration.setEnabled(false);
 			mt = new MyAsyncTask();
 			mt.execute(request);
-
-			Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
-			getActivity().getActionBar().setSelectedNavigationItem(0);
 		} else {
-			Toast.makeText(getActivity(), "Введите корректные данные",Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), "Введите корректные данные", Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -74,22 +68,34 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 		String login;
 		String password;
 	}
-	
+
 	public class MyAsyncTask extends AsyncTask<RegisterRequest, Void, RegisterResponse> {
-		
+
+		ApiException exception;
+
 		@Override
 		protected RegisterResponse doInBackground(RegisterRequest... params) {
 			try {
 				return new API().register(params[0].login, params[0].password);
 			} catch (ApiException apIexception) {
-				apIexception.printStackTrace();
+				exception = apIexception;
 			}
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(RegisterResponse result) {
+			Log.d("test", "onPostExecute 1");
 			super.onPostExecute(result);
-
+			Log.d("test", "onPostExecute 2");
+			Registration.setEnabled(true);
+			Log.d("test", "onPostExecute 3");
+			if (result == null) {
+				UIUtils.showToastByException(getActivity(), exception);
+			} else {
+				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
+				getActivity().getActionBar().setSelectedNavigationItem(0);
+			}
 		}
 	}
 }

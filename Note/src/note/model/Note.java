@@ -1,18 +1,19 @@
 package note.model;
+
 public class Note {
 
 	private static long counter = -1;
 
 	long id;
 	String title;
-	String description;
+	String text;
 
 	public Note() {
 	}
 
-	public Note(String _title, String _description) {
-		title = _title;
-		description = _description;
+	public Note(String title, String description) {
+		this.title = title;
+		this.text = description;
 		id = counter++;
 	}
 
@@ -24,16 +25,16 @@ public class Note {
 		return title;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getText() {
+		return text;
 	}
 
-	public void setTitle(String _title) {
-		title = _title;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		this.text = description;
 	}
 
 }

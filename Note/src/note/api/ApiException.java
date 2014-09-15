@@ -16,4 +16,5 @@ public class ApiException extends Exception {
 		super(throwable);
 		this.typeOfError = typeOfError;
 	}
+
 }

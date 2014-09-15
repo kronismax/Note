@@ -22,7 +22,7 @@ public class EditNote extends Activity {
 		editNote = (EditText) findViewById(R.id.editNote);
 		intent = getIntent();
 		editNote.setText(((MyApplication) getApplication()).getLocalData().mNotes
-				.get(intent.getIntExtra("NoteID", -1)).getDescription());
+				.get(intent.getIntExtra("NoteID", -1)).getText());
 	}
 
 	@Override

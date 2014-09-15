@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.example.note.R;
 
 public class NewNoteActivity extends Activity {
+
 	protected API API;
 	protected EditText textNote;
 	protected EditText titleNote;
@@ -41,7 +42,7 @@ public class NewNoteActivity extends Activity {
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
-		final String NOTE 			 = textNote.getText().toString();
+		final String NOTE = textNote.getText().toString();
 		final String NOTE_TITLE_NOTE = titleNote.getText().toString();
 
 		switch (item.getItemId()) {

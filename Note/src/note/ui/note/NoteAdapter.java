@@ -48,7 +48,7 @@ public class NoteAdapter extends BaseAdapter {
 		Note d = getItem(position);
 		((TextView) view.findViewById(R.id.noteName)).setText(d.getTitle());
 		((TextView) view.findViewById(R.id.noteSubtitle)).setText(d
-				.getDescription());
+				.getText());
 		return view;
 	}
 }

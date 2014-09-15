@@ -29,6 +29,8 @@
         android:layout_marginTop="30dp"
         android:ems="10"
         android:hint="Логин"
+        android:maxLines="1"
+        android:singleLine="true"
         android:textSize="20sp"
         android:textStyle="italic"
         android:width="320dp" >
@@ -47,6 +49,8 @@
         android:ems="10"
         android:hint="Пароль"
         android:inputType="textPassword"
+        android:maxLines="1"
+        android:singleLine="true"
         android:textSize="20sp"
         android:textStyle="italic"
         android:width="320dp" />
@@ -62,6 +66,8 @@
         android:ems="10"
         android:hint="Повторите пароль"
         android:inputType="textPassword"
+        android:maxLines="1"
+        android:singleLine="true"
         android:textSize="20sp"
         android:textStyle="italic"
         android:width="320dp" />

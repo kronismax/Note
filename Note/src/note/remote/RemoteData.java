@@ -32,7 +32,7 @@ public class RemoteData {
 	}
 
 	public void setUsersNote(String login, String text, String title) {
-		//mNotes.put(login, new RemouteNote(title, text));
+		// mNotes.put(login, new RemouteNote(title, text));
 	}
 
 }
