@@ -34,7 +34,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	MyAsyncTask mt;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstance) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
 		return inflater.inflate(R.layout.log_frag, container, false);
 	}
 
@@ -45,8 +45,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		PassText = (EditText) view.findViewById(R.id.passText);
 		Login = (Button) view.findViewById(R.id.button1);
 		if (saveInstanceState == null) {
-			SharedPreferences preferences = getActivity().getSharedPreferences(
-					PREF_SETTINGS, Context.MODE_PRIVATE);
+			SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
 			String stringPreference = preferences.getString("login", "");
 			LogText.setText(stringPreference);
 			if (!TextUtils.isEmpty(LogText.getText())) {
@@ -62,8 +61,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		final String LOGIN = LogText.getText().toString();
 		final String PASS = PassText.getText().toString();
 		if (LOGIN.isEmpty() || PASS.isEmpty()) {
-			Toast toast = Toast.makeText(getActivity(),
-					"Введите логин или пароль", Toast.LENGTH_SHORT);
+			Toast toast = Toast.makeText(getActivity(), "Введите логин или пароль", Toast.LENGTH_SHORT);
 			toast.setGravity(Gravity.BOTTOM, 10, 50);
 			toast.show();
 		} else {
@@ -79,8 +77,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 	private void saveLastLogin() {
 		final String LOGIN = LogText.getText().toString();
-		SharedPreferences.Editor editor = getActivity().getSharedPreferences(
-				PREF_SETTINGS, Context.MODE_PRIVATE).edit();
+		SharedPreferences.Editor editor = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE).edit();
 		editor.putString("login", LOGIN);
 		editor.commit();
 	}
@@ -91,8 +88,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 	}
 
-	public class MyAsyncTask extends
-			AsyncTask<LoginRequest, Void, LoginResponse> {
+	public class MyAsyncTask extends AsyncTask<LoginRequest, Void, LoginResponse> {
 
 		ApiException exception;
 
@@ -113,22 +109,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				UIUtils.showToastByException(getActivity(), exception);
 			} else {
 				if (result.getResult() == 0) {
-					((MyApplication) getActivity().getApplication())
-							.getLocalData().setSessionID(result.sessionId);
-					Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT)
-							.show();
+					((MyApplication) getActivity().getApplication()).getLocalData().setSessionID(result.sessionId);
+					Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
 					saveLastLogin();
-					Intent intent = new Intent(getActivity(),
-							NoteActivity.class);
+					Intent intent = new Intent(getActivity(), NoteActivity.class);
 					startActivity(intent);
 				} else if (result.getResult() == 1) {
-					Toast toast = Toast.makeText(getActivity(),
-							"Неправильный логин ии пароль", Toast.LENGTH_SHORT);
+					Toast toast = Toast.makeText(getActivity(), "Неправильный логин ии пароль", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				} else {
-					Toast toast = Toast.makeText(getActivity(),
-							"Что то не так", Toast.LENGTH_SHORT);
+					Toast toast = Toast.makeText(getActivity(), "Что то не так", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				}

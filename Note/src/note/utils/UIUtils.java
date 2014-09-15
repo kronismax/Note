@@ -2,6 +2,7 @@ package note.utils;
 
 import note.api.ApiException;
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 public final class UIUtils {
@@ -10,7 +11,7 @@ public final class UIUtils {
 	}
 
 	public static void showToastByException(Context context, ApiException e) {
-
+		e.printStackTrace();
 		switch (e.getError()) {
 		case ERROR:
 			Toast.makeText(context, "ERROR", Toast.LENGTH_SHORT).show();

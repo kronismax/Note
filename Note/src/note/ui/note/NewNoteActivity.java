@@ -2,10 +2,18 @@ package note.ui.note;
 
 import note.MyApplication;
 import note.api.API;
+import note.api.API.NewNoteResponse;
+import note.api.ApiException;
+import note.api.API.LoginResponse;
 import note.model.Note;
+import note.ui.login.LoginFragment.LoginRequest;
+import note.ui.login.LoginFragment.MyAsyncTask;
+import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -51,9 +59,12 @@ public class NewNoteActivity extends Activity {
 				note.setDescription(NOTE);
 				note.setTitle(NOTE_TITLE_NOTE);
 				((MyApplication) getApplication()).getLocalData().mNotes.add(note);
-				API.putNote(((MyApplication) getApplication()).getLocalData().sessionId,NOTE, NOTE_TITLE_NOTE);
-				intent = new Intent(this, NoteActivity.class);
-				startActivity(intent);
+				API.putNote(((MyApplication) getApplication()).getLocalData().sessionId, NOTE, NOTE_TITLE_NOTE);
+				// intent = new Intent(this, NoteActivity.class);
+				// startActivity(intent);
+				MyAsyncTask mt;
+				mt = new MyAsyncTask();
+				mt.execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().sessionId, NOTE_TITLE_NOTE, NOTE));
 				return true;
 			} else {
 				Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
@@ -62,4 +73,57 @@ public class NewNoteActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
+
+	public class NewNoteRequest {
+
+		String sessionId;
+		String title;
+		String text;
+
+		public NewNoteRequest(String id, String title, String text) {
+			sessionId = id;
+			this.title = title;
+			this.text = text;
+		}
+	}
+
+	public class MyAsyncTask extends AsyncTask<NewNoteRequest, Void, NewNoteResponse> {
+
+		ApiException exception;
+
+		@Override
+		protected NewNoteResponse doInBackground(NewNoteRequest... params) {
+			try {
+				return new API().newNote(params[0].sessionId, params[0].title, params[0].text);
+			} catch (ApiException apIexception) {
+				exception = apIexception;
+			}
+			return null;
+		}
+
+		protected void onPostExecute(NewNoteResponse result) {
+			super.onPostExecute(result);
+
+			if (result == null) {
+				UIUtils.showToastByException(NewNoteActivity.this, exception);
+			} else {
+				if (result.getResult() == 0) {
+
+					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
+
+					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
+					startActivity(intent);
+				} else if (result.getResult() == 1) {
+					Toast toast = Toast.makeText(NewNoteActivity.this, "Неправильная сессия", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.BOTTOM, 10, 50);
+					toast.show();
+				} else {
+					Toast toast = Toast.makeText(NewNoteActivity.this, "Что то не так", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.BOTTOM, 10, 50);
+					toast.show();
+				}
+			}
+		}
+	}
+
 }

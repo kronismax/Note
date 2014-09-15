@@ -22,8 +22,16 @@ public class MainActivity extends Activity implements TabListener {
 			mFragments[0] = new LoginFragment();
 			mFragments[1] = new RegistrationFragment();
 		} else {
-			mFragments[0] = getFragmentManager().getFragment(savedInstanceState, LoginFragment.class.getSimpleName());
-			mFragments[1] = getFragmentManager().getFragment(savedInstanceState, RegistrationFragment.class.getSimpleName());
+			if (savedInstanceState.containsKey(LoginFragment.class.getSimpleName())) {
+				mFragments[0] = getFragmentManager().getFragment(savedInstanceState, LoginFragment.class.getSimpleName());
+			} else {
+				mFragments[0] = new LoginFragment();
+			}
+			if (savedInstanceState.containsKey(RegistrationFragment.class.getSimpleName())) {
+				mFragments[1] = getFragmentManager().getFragment(savedInstanceState, RegistrationFragment.class.getSimpleName());
+			} else {
+				mFragments[1] = new RegistrationFragment();
+			}
 		}
 
 		setContentView(R.layout.activity_main);
@@ -37,8 +45,12 @@ public class MainActivity extends Activity implements TabListener {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getActionBar().getSelectedNavigationIndex());
-		getFragmentManager().putFragment(outState,LoginFragment.class.getSimpleName(), mFragments[0]);
-		getFragmentManager().putFragment(outState,RegistrationFragment.class.getSimpleName(), mFragments[1]);
+		if (mFragments[0].isAdded()) {
+			getFragmentManager().putFragment(outState, LoginFragment.class.getSimpleName(), mFragments[0]);
+		}
+		if (mFragments[1].isAdded()) {
+			getFragmentManager().putFragment(outState, RegistrationFragment.class.getSimpleName(), mFragments[1]);
+		}
 	}
 
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -66,11 +78,9 @@ public class MainActivity extends Activity implements TabListener {
 		}
 	}
 
-	public void onTabUnselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 
-	public void onTabReselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 }

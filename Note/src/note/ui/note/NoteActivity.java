@@ -84,5 +84,7 @@ public class NoteActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
+	
+	
+	
 }
