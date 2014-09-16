@@ -27,8 +27,7 @@ public class NoteActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.note_activity);
 
-		noteAdapter = new NoteAdapter(this,
-				((MyApplication) getApplication()).getLocalData().mNotes);
+		noteAdapter = new NoteAdapter(this,((MyApplication) getApplication()).getLocalData().mNotes);
 
 		// buttonDelete = (Button) findViewById(R.id.buttonDelete);
 
@@ -37,8 +36,7 @@ public class NoteActivity extends Activity {
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View itemClicked,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
 				Intent intent = new Intent(NoteActivity.this, EditNote.class);
 				intent.putExtra("NoteID", position);
 				startActivity(intent);
@@ -64,8 +62,7 @@ public class NoteActivity extends Activity {
 
 		switch (item.getItemId()) {
 		case R.id.action_changePassword:
-			Intent intentChangePassword = new Intent(this,
-					ChengPasswordActivity.class);
+			Intent intentChangePassword = new Intent(this, ChengPasswordActivity.class);
 			startActivity(intentChangePassword);
 			return true;
 		case R.id.action_logOut:

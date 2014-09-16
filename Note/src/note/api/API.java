@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
+import note.api.ApiException.TypeOfError;
 import note.remote.DataBaseUsers;
 import note.remote.RemoteUser;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -192,5 +191,65 @@ public class API {
 			throw new ApiException(ApiException.typeOfError.ERROR, e);
 		}
 	}
+	
+	public static class NoteResponse {
+		String title;
+		String shortContent;
+		long noteID;
 
+		public NoteResponse(JSONObject obj) throws JSONException {
+			this.title = obj.getString("title");
+			this.shortContent = obj.getString("shortContent");
+			this.noteID = obj.getLong("noteID");
+		}
+	}
+	
+	ArrayList<NoteResponse> notes;
+
+	public class GetNoteResponse {
+		int getNoteResponse;
+		String title;
+		String content;
+
+		public GetNoteResponse(int getNoteResponse, String title, String content) {
+			this.getNoteResponse = getNoteResponse;
+			this.title = title;
+			this.content = content;
+		}
+
+		public int getGetNote() {
+			return getNoteResponse;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public String getContent() {
+			return content;
+		}
+	}
+	
+	public GetNoteResponse getNote(String sessionID, String noteID) throws ApiException {
+		int getNoteResponse;
+		String title;
+		String content;
+
+		Uri.Builder builder = API.builder("getNote");
+		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", noteID);
+		String a = GET(builder.build().toString());
+
+		try {
+			JSONObject json = new JSONObject(a);
+			getNoteResponse = json.getInt("result");
+			title = json.getString("title");
+			content = json.getString("content");
+		} catch (Exception e) {
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+		}
+		return new GetNoteResponse(getNoteResponse, title, content);
+	}
+
+	
+	
 }
