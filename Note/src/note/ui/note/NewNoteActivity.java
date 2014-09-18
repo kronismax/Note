@@ -24,14 +24,14 @@ import com.example.note.R;
 
 public class NewNoteActivity extends Activity {
 
-	protected API API;
-	protected EditText textNote;
-	protected EditText titleNote;
-	protected Intent intent;
-	protected Note note = new Note();
+	protected API		API;
+	protected EditText	textNote;
+	protected EditText	titleNote;
+	protected Intent	intent;
+	protected Note		note	= new Note();
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_note_activity);
 		API = new API();
@@ -43,44 +43,42 @@ public class NewNoteActivity extends Activity {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu){
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.new_note_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item){
 		final String NOTE = textNote.getText().toString();
 		final String NOTE_TITLE_NOTE = titleNote.getText().toString();
 
 		switch (item.getItemId()) {
-		case R.id.action_save_new_note:
-			if (!NOTE_TITLE_NOTE.equals("")) {
-				note.setDescription(NOTE);
-				note.setTitle(NOTE_TITLE_NOTE);
-				((MyApplication) getApplication()).getLocalData().mNotes.add(note);
-				API.putNote(((MyApplication) getApplication()).getLocalData().sessionId, NOTE, NOTE_TITLE_NOTE);
-				// intent = new Intent(this, NoteActivity.class);
-				// startActivity(intent);
-				MyAsyncTask mt;
-				mt = new MyAsyncTask();
-				mt.execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().sessionId, NOTE_TITLE_NOTE, NOTE));
-				return true;
-			} else {
-				Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
-			}
-		default:
-			return super.onOptionsItemSelected(item);
+			case R.id.action_save_new_note:
+				if (!NOTE_TITLE_NOTE.equals("")) {
+					note.setDescription(NOTE);
+					note.setTitle(NOTE_TITLE_NOTE);
+					((MyApplication) getApplication()).getLocalData().mNotes.add(note);
+					API.putNote(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE, NOTE_TITLE_NOTE);
+					MyAsyncTask mt;
+					mt = new MyAsyncTask();
+					mt.execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE_TITLE_NOTE, NOTE));
+					return true;
+				} else {
+					Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
+				}
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 
 	public class NewNoteRequest {
 
-		String sessionId;
-		String title;
-		String text;
+		String	sessionId;
+		String	title;
+		String	text;
 
-		public NewNoteRequest(String id, String title, String text) {
+		public NewNoteRequest(String id,String title,String text) {
 			sessionId = id;
 			this.title = title;
 			this.text = text;
@@ -89,10 +87,10 @@ public class NewNoteActivity extends Activity {
 
 	public class MyAsyncTask extends AsyncTask<NewNoteRequest, Void, NewNoteResponse> {
 
-		ApiException exception;
+		ApiException	exception;
 
 		@Override
-		protected NewNoteResponse doInBackground(NewNoteRequest... params) {
+		protected NewNoteResponse doInBackground(NewNoteRequest... params){
 			try {
 				return new API().newNote(params[0].sessionId, params[0].title, params[0].text);
 			} catch (ApiException apIexception) {
@@ -101,7 +99,7 @@ public class NewNoteActivity extends Activity {
 			return null;
 		}
 
-		protected void onPostExecute(NewNoteResponse result) {
+		protected void onPostExecute(NewNoteResponse result){
 			super.onPostExecute(result);
 
 			if (result == null) {
@@ -110,15 +108,16 @@ public class NewNoteActivity extends Activity {
 				if (result.getResult() == 0) {
 
 					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
-
 					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
 					startActivity(intent);
 				} else if (result.getResult() == 1) {
+
 					Toast toast = Toast.makeText(NewNoteActivity.this, "Неправильная сессия", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				} else {
-					Toast toast = Toast.makeText(NewNoteActivity.this, "Что то не так", Toast.LENGTH_SHORT);
+
+					Toast toast = Toast.makeText(NewNoteActivity.this, "Эксэпшн", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				}

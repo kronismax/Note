@@ -1,6 +1,5 @@
 package note.ui.note;
 
-
 import java.util.ArrayList;
 
 import note.model.Note;
@@ -36,7 +35,7 @@ public class NoteAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return objects.get(position).getId();
+		return position;
 	}
 
 	@Override
@@ -45,10 +44,16 @@ public class NoteAdapter extends BaseAdapter {
 		if (view == null) {
 			view = lInflater.inflate(R.layout.list, parent, false);
 		}
-		Note d = getItem(position);
+
+		Note d = getNote(position);
+
 		((TextView) view.findViewById(R.id.noteName)).setText(d.getTitle());
-		((TextView) view.findViewById(R.id.noteSubtitle)).setText(d
-				.getText());
+		((TextView) view.findViewById(R.id.noteSubtitle)).setText(d.getDescription());
+
 		return view;
+	}
+
+	Note getNote(int position) {
+		return ((Note) getItem(position));
 	}
 }

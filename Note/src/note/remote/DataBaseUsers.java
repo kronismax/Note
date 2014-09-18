@@ -52,6 +52,5 @@ public class DataBaseUsers {
 	}
 
 	public void init() {
-
 	}
 }

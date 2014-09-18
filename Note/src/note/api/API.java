@@ -5,13 +5,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import note.api.ApiException.TypeOfError;
+import note.model.Note;
 import note.remote.DataBaseUsers;
 import note.remote.RemoteUser;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,17 +54,20 @@ public class API {
 		return userExists;
 	}
 
-	public boolean chengPassword(String login, String password, String oldPassword) {
-		boolean chengPassword = false;
-		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
-		for (int i = 0; i < mUsers.size(); i++) {
-			if (mUsers.get(i).login.equals(login) && mUsers.get(i).password.equals(oldPassword)) {
-				DataBaseUsers.getInstance().setUsersChengPassword(i, new RemoteUser(login, password));
-				chengPassword = true;
-			}
-		}
-		return chengPassword;
-	}
+	// public boolean chengPassword(String login, String password, String
+	// oldPassword) {
+	// boolean chengPassword = false;
+	// ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
+	// for (int i = 0; i < mUsers.size(); i++) {
+	// if (mUsers.get(i).login.equals(login) &&
+	// mUsers.get(i).password.equals(oldPassword)) {
+	// DataBaseUsers.getInstance().setUsersChengPassword(i, new
+	// RemoteUser(login, password));
+	// chengPassword = true;
+	// }
+	// }
+	// return chengPassword;
+	// }
 
 	public void putNote(String LOGIN, String NOTE, String NOTE_TITLE_NOTE) {
 		DataBaseUsers.getInstance().setNote(LOGIN, NOTE, NOTE_TITLE_NOTE);
@@ -75,9 +83,9 @@ public class API {
 	}
 
 	public static String GET(String url) throws ApiException {
-		
+
 		Log.d("e", "request:" + url);
-		
+
 		InputStream inputStream = null;
 		String result = "";
 		try {
@@ -95,9 +103,7 @@ public class API {
 		} catch (Exception e) {
 			throw new ApiException(ApiException.typeOfError.ERROR_CONNECTION, e);
 		}
-		
 		Log.d("e", "response:" + result);
-		
 		return result;
 	}
 
@@ -107,6 +113,10 @@ public class API {
 
 		public int getResult() {
 			return result;
+		}
+
+		public String getSessionID() {
+			return sessionId;
 		}
 
 		public LoginResponse() {
@@ -164,6 +174,64 @@ public class API {
 		return result;
 	}
 
+	public static class ChengPasswordResponse {
+		int userChengPassword;
+
+		public ChengPasswordResponse(int userChengPassword) {
+			this.userChengPassword = userChengPassword;
+		}
+
+		public int getChengPasswordResponse() {
+			return userChengPassword;
+		}
+	}
+
+	public ChengPasswordResponse chengPassword(String sessionID, String newPassword, String oldPassword) throws ApiException {
+		int userChengPassword;
+
+		Uri.Builder builder = API.builder("changePassword");
+		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("oldPass", oldPassword).appendQueryParameter("newPass", newPassword);
+
+		Log.d("chengPassword", builder.build().toString());
+
+		String a = GET(builder.build().toString());
+		try {
+			JSONObject json = new JSONObject(a);
+			userChengPassword = json.getInt("result");
+		} catch (Exception e) {
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+		}
+		return new ChengPasswordResponse(userChengPassword);
+	}
+
+	public class LogOutResponse {
+		int userLogOut;
+
+		public LogOutResponse(int userLogOut) {
+			this.userLogOut = userLogOut;
+		}
+
+		public int getChengPasswordResponse() {
+			return userLogOut;
+		}
+	}
+
+	public LogOutResponse logOut(String ID) throws ApiException {
+		int userLogOut;
+
+		Uri.Builder builder = API.builder("logout");
+		builder.appendQueryParameter("sessionID", ID);
+
+		String a = GET(builder.build().toString());
+		try {
+			JSONObject json = new JSONObject(a);
+			userLogOut = json.getInt("result");
+		} catch (Exception e) {
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+		}
+		return new LogOutResponse(userLogOut);
+	}
+
 	public class NewNoteResponse {
 
 		long ID;
@@ -191,7 +259,7 @@ public class API {
 			throw new ApiException(ApiException.typeOfError.ERROR, e);
 		}
 	}
-	
+
 	public static class NoteResponse {
 		String title;
 		String shortContent;
@@ -203,8 +271,56 @@ public class API {
 			this.noteID = obj.getLong("noteID");
 		}
 	}
-	
+
 	ArrayList<NoteResponse> notes;
+
+	public class NoteListResponse {
+		int noteListResponse;
+		ArrayList<Note> note;
+
+		public NoteListResponse(int noteListResponse, ArrayList<Note> note) {
+			this.noteListResponse = noteListResponse;
+			this.note = note;
+		}
+
+		public int getNoteCreate() {
+			return noteListResponse;
+		}
+
+		public ArrayList<Note> getNoteArray() {
+			return note;
+		}
+	}
+
+	public NoteListResponse getNotesList(String ID) throws ApiException {
+		int noteCreate;
+		Note[] note;
+
+		Uri.Builder builder = API.builder("getNotesList");
+		builder.appendQueryParameter("sessionID", ID);
+
+		String a = GET(builder.build().toString());
+
+		try {
+			JSONObject json = new JSONObject(a);
+			noteCreate = json.getInt("result");
+
+			JSONArray jsonArray = json.getJSONArray("notes");
+			note = new Note[jsonArray.length()];
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject item = jsonArray.getJSONObject(i);
+
+				Log.d("putNote", item.getString("title"));
+				note[i] = new Note(item.getString("title"), item.getString("shortContent"), item.getLong("noteID"));
+			}
+		} catch (JSONException e) {
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+		}
+
+		ArrayList<Note> mNotes = new ArrayList<Note>(Arrays.asList(note));
+		Log.d("GET_NOTE_LIST", mNotes.toString());
+		return new NoteListResponse(noteCreate, mNotes);
+	}
 
 	public class GetNoteResponse {
 		int getNoteResponse;
@@ -229,7 +345,7 @@ public class API {
 			return content;
 		}
 	}
-	
+
 	public GetNoteResponse getNote(String sessionID, String noteID) throws ApiException {
 		int getNoteResponse;
 		String title;
@@ -250,6 +366,4 @@ public class API {
 		return new GetNoteResponse(getNoteResponse, title, content);
 	}
 
-	
-	
 }

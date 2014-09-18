@@ -25,21 +25,20 @@ import com.example.note.R;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
-	private EditText LogText;
-	private EditText PassText;
-	private Button Login;
-	private static final String PREF_SETTINGS = "Settings";
-	API api = new API();
-
-	MyAsyncTask mt;
+	private EditText			LogText;
+	private EditText			PassText;
+	private Button				Login;
+	API							api				= new API();
+	MyAsyncTask					mt;
+	private static final String	PREF_SETTINGS	= "Settings";
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance){
 		return inflater.inflate(R.layout.log_frag, container, false);
 	}
 
 	@Override
-	public void onViewCreated(View view, Bundle saveInstanceState) {
+	public void onViewCreated(View view, Bundle saveInstanceState){
 		super.onViewCreated(view, saveInstanceState);
 		LogText = (EditText) view.findViewById(R.id.logText);
 		PassText = (EditText) view.findViewById(R.id.passText);
@@ -57,7 +56,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		Login.setOnClickListener(this);
 	}
 
-	public void onClick(View arg0) {
+	public void onClick(View arg0){
 		final String LOGIN = LogText.getText().toString();
 		final String PASS = PassText.getText().toString();
 		if (LOGIN.isEmpty() || PASS.isEmpty()) {
@@ -75,7 +74,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		}
 	}
 
-	private void saveLastLogin() {
+	private void saveLastLogin(){
 		final String LOGIN = LogText.getText().toString();
 		SharedPreferences.Editor editor = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE).edit();
 		editor.putString("login", LOGIN);
@@ -83,17 +82,18 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	public static class LoginRequest {
-		String login;
-		String password;
+
+		String	login;
+		String	password;
 
 	}
 
 	public class MyAsyncTask extends AsyncTask<LoginRequest, Void, LoginResponse> {
 
-		ApiException exception;
+		ApiException	exception;
 
 		@Override
-		protected LoginResponse doInBackground(LoginRequest... params) {
+		protected LoginResponse doInBackground(LoginRequest... params){
 			try {
 				return new API().login(params[0].login, params[0].password);
 			} catch (ApiException apIexception) {
@@ -102,14 +102,14 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			return null;
 		}
 
-		protected void onPostExecute(LoginResponse result) {
+		protected void onPostExecute(LoginResponse result){
 			super.onPostExecute(result);
 
 			if (result == null) {
 				UIUtils.showToastByException(getActivity(), exception);
 			} else {
 				if (result.getResult() == 0) {
-					((MyApplication) getActivity().getApplication()).getLocalData().setSessionID(result.sessionId);
+					((MyApplication) getActivity().getApplication()).getLocalData().setSessionId(result.sessionId);
 					Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
 					saveLastLogin();
 					Intent intent = new Intent(getActivity(), NoteActivity.class);

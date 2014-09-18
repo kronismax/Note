@@ -11,11 +11,11 @@ import com.example.note.R;
 
 public class MainActivity extends Activity implements TabListener {
 
-	private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
+	private static final String	STATE_SELECTED_NAVIGATION_ITEM	= "selected_navigation_item";
 
-	private final Fragment mFragments[] = new Fragment[2];
+	private final Fragment		mFragments[]					= new Fragment[2];
 
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
@@ -42,7 +42,7 @@ public class MainActivity extends Activity implements TabListener {
 		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.Registration)).setTabListener(this));
 	}
 
-	protected void onSaveInstanceState(Bundle outState) {
+	protected void onSaveInstanceState(Bundle outState){
 		super.onSaveInstanceState(outState);
 		outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getActionBar().getSelectedNavigationIndex());
 		if (mFragments[0].isAdded()) {
@@ -53,7 +53,7 @@ public class MainActivity extends Activity implements TabListener {
 		}
 	}
 
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(Bundle savedInstanceState){
 		super.onRestoreInstanceState(savedInstanceState);
 
 		if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
@@ -61,7 +61,7 @@ public class MainActivity extends Activity implements TabListener {
 		}
 	}
 
-	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft){
 		for (int i = 0; i < mFragments.length; ++i) {
 			if (i == tab.getPosition()) {
 				if (!mFragments[i].isAdded()) {
@@ -78,9 +78,9 @@ public class MainActivity extends Activity implements TabListener {
 		}
 	}
 
-	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction){
 	}
 
-	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction){
 	}
 }
