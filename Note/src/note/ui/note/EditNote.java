@@ -4,16 +4,19 @@ import note.MyApplication;
 import note.api.API;
 import note.api.API.GetNoteResponse;
 import note.api.ApiException;
+import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.example.note.R;
 
 public class EditNote extends Activity {
@@ -23,15 +26,15 @@ public class EditNote extends Activity {
 
 	public class GetNote {
 
-		private String	noteID;
+		private Long	noteID;
 		private String	sessionID;
 
-		public GetNote(String noteID,String sessionID) {
-			this.noteID = noteID;
+		public GetNote(Long string,String sessionID) {
+			this.noteID = string;
 			this.sessionID = sessionID;
 		}
 
-		public String getNoteID(){
+		public Long getNoteID(){
 			return noteID;
 		}
 
@@ -60,8 +63,9 @@ public class EditNote extends Activity {
 		switch (item.getItemId()) {
 			case R.id.action_edit_note:
 				Intent intent = new Intent(this, NoteActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
-				finish();
+				//finish();
 				break;
 			default:
 				break;
@@ -93,11 +97,12 @@ public class EditNote extends Activity {
 		@Override
 		protected void onPostExecute(GetNoteResponse result){
 			super.onPostExecute(result);
+			//Log.d("e", msg);
 			if (result != null) {
 				switch (result.getGetNote()) {
 					case 0:
 						getActionBar().setTitle(result.getTitle());
-
+						
 						editNote.setText(result.getContent());
 
 						Toast toast = Toast.makeText(EditNote.this, "Успех", Toast.LENGTH_LONG);
@@ -111,9 +116,7 @@ public class EditNote extends Activity {
 						break;
 				}
 			} else {
-				Toast toast1 = Toast.makeText(EditNote.this, "Эксэпшн", Toast.LENGTH_LONG);
-				toast1.setGravity(Gravity.BOTTOM, 10, 50);
-				toast1.show();
+				UIUtils.showToastByException(EditNote.this, apiexception);
 			}
 		}
 	}

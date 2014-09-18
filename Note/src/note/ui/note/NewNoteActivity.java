@@ -109,15 +109,15 @@ public class NewNoteActivity extends Activity {
 
 					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
 					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
+					
 				} else if (result.getResult() == 1) {
-
 					Toast toast = Toast.makeText(NewNoteActivity.this, "Неправильная сессия", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				} else {
-
-					Toast toast = Toast.makeText(NewNoteActivity.this, "Эксэпшн", Toast.LENGTH_SHORT);
+					Toast toast = Toast.makeText(NewNoteActivity.this, "Попробуйте позже", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				}

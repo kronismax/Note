@@ -275,16 +275,16 @@ public class API {
 	ArrayList<NoteResponse> notes;
 
 	public class NoteListResponse {
-		int noteListResponse;
+		int result;
 		ArrayList<Note> note;
 
 		public NoteListResponse(int noteListResponse, ArrayList<Note> note) {
-			this.noteListResponse = noteListResponse;
+			this.result = noteListResponse;
 			this.note = note;
 		}
 
 		public int getNoteCreate() {
-			return noteListResponse;
+			return result;
 		}
 
 		public ArrayList<Note> getNoteArray() {
@@ -346,13 +346,14 @@ public class API {
 		}
 	}
 
-	public GetNoteResponse getNote(String sessionID, String noteID) throws ApiException {
+	public GetNoteResponse getNote(String sessionID, Long noteID) throws ApiException {
 		int getNoteResponse;
 		String title;
 		String content;
 
 		Uri.Builder builder = API.builder("getNote");
-		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", noteID);
+		Log.d("e", "id: "+noteID);
+		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", Long.toString(noteID));
 		String a = GET(builder.build().toString());
 
 		try {

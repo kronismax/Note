@@ -102,7 +102,7 @@ public class NoteActivity extends Activity {
 						break;
 					case 1:
 						if (result.getNoteArray() == null) {
-							Toast toast1 = Toast.makeText(NoteActivity.this, "You can create new note :)", Toast.LENGTH_LONG);
+							Toast toast1 = Toast.makeText(NoteActivity.this, "Ничего нет", Toast.LENGTH_LONG);
 							toast1.setGravity(Gravity.BOTTOM, 10, 50);
 							toast1.show();
 						}

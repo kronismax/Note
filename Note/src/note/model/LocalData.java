@@ -3,7 +3,7 @@ package note.model;
 import java.util.ArrayList;
 
 public class LocalData {
-	private String noteID;
+	private Long noteID;
 	private String sessionID;
 	public ArrayList<Note> mNotes = new ArrayList<Note>();
 
@@ -15,7 +15,7 @@ public class LocalData {
 		this.sessionID = sessionId;
 	}
 
-	public void setNoteID(String noteID) {
+	public void setNoteID(Long noteID) {
 		this.noteID = noteID;
 	}
 
@@ -27,7 +27,7 @@ public class LocalData {
 		return mNotes;
 	}
 
-	public String getNoteID() {
+	public Long getNoteID() {
 		return noteID;
 
 	}
