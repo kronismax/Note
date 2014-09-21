@@ -2,7 +2,6 @@ package note.utils;
 
 import note.api.ApiException;
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 public final class UIUtils {

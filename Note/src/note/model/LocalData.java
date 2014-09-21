@@ -3,32 +3,38 @@ package note.model;
 import java.util.ArrayList;
 
 public class LocalData {
-	private Long noteID;
-	private String sessionID;
-	public ArrayList<Note> mNotes = new ArrayList<Note>();
 
-	public void setmNotes(ArrayList<Note> mNotes) {
+	private Long			noteID;
+	private String			sessionID;
+	public ArrayList<Note>	mNotes	= new ArrayList<Note>();
+
+	public void setmNotes(ArrayList<Note> mNotes){
 		this.mNotes = mNotes;
 	}
 
-	public void setSessionId(String sessionId) {
+	public void setSessionId(String sessionId){
 		this.sessionID = sessionId;
 	}
 
-	public void setNoteID(Long noteID) {
+	public void setNoteID(Long noteID){
 		this.noteID = noteID;
 	}
 
-	public String getSessionId() {
+	public String getSessionId(){
 		return sessionID;
 	}
 
-	public ArrayList<Note> getmNotes() {
+	public ArrayList<Note> getmNotes(){
 		return mNotes;
 	}
 
-	public Long getNoteID() {
+	public Long getNoteID(){
 		return noteID;
 
 	}
+
+	public void addLocalNoteForIndex(String title, String content, long id, int position){
+		mNotes.add(position, new Note(title, content, id));
+	}
+
 }

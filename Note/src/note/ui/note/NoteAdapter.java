@@ -1,7 +1,6 @@
 package note.ui.note;
 
-import java.util.ArrayList;
-
+import note.model.LocalData;
 import note.model.Note;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,47 +12,49 @@ import android.widget.TextView;
 import com.example.note.R;
 
 public class NoteAdapter extends BaseAdapter {
-	Context ctx;
-	LayoutInflater lInflater;
-	ArrayList<Note> objects;
 
-	public NoteAdapter(Context context, ArrayList<Note> notes) {
+	Context			ctx;
+	LayoutInflater	lInflater;
+	LocalData		ld;
+
+	public NoteAdapter(Context context,LocalData ld) {
 		ctx = context;
-		objects = notes;
+		this.ld = ld;
 		lInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	@Override
-	public int getCount() {
-		return objects.size();
+	public int getCount(){
+		return ld.getmNotes().size();
 	}
 
 	@Override
-	public Note getItem(int position) {
-		return objects.get(position);
+	public Note getItem(int position){
+		return ld.getmNotes().get(position);
 	}
 
 	@Override
-	public long getItemId(int position) {
+	public long getItemId(int position){
 		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, ViewGroup parent){
 		View view = convertView;
 		if (view == null) {
 			view = lInflater.inflate(R.layout.list, parent, false);
 		}
 
-		Note d = getNote(position);
+		Note d = getItem(position);
 
 		((TextView) view.findViewById(R.id.noteName)).setText(d.getTitle());
 		((TextView) view.findViewById(R.id.noteSubtitle)).setText(d.getDescription());
 
 		return view;
+
 	}
 
-	Note getNote(int position) {
+	Note getNote(int position){
 		return ((Note) getItem(position));
 	}
 }

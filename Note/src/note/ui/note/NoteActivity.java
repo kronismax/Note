@@ -7,6 +7,7 @@ import note.api.API.NoteListResponse;
 import note.api.ApiException;
 import note.ui.login.MainActivity;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,9 +37,9 @@ public class NoteActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.note_activity);
 
-		new MyNotesListAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
-		
-		noteAdapter = new NoteAdapter(this, ((MyApplication) getApplication()).getLocalData().mNotes);
+		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+
+		noteAdapter = new NoteAdapter(this, ((MyApplication) getApplication()).getLocalData());
 
 		// buttonDelete = (Button) findViewById(R.id.buttonDelete);
 
@@ -48,7 +49,8 @@ public class NoteActivity extends Activity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id){
-				Intent intent = new Intent(NoteActivity.this, EditNote.class);
+				Intent intent = new Intent(NoteActivity.this, EditNoteActivity.class);
+				intent.putExtra("POSITION", position);
 				intent.putExtra("NoteID", position);
 				startActivity(intent);
 			}
@@ -118,7 +120,7 @@ public class NoteActivity extends Activity {
 
 	@Override
 	protected void onResume(){
-		noteAdapter.notifyDataSetChanged();
+		updateNoteAdapter();
 		super.onResume();
 	}
 
@@ -210,6 +212,64 @@ public class NoteActivity extends Activity {
 				}
 			} else {
 				Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
+				toast1.setGravity(Gravity.BOTTOM, 10, 50);
+				toast1.show();
+			}
+		}
+	}
+
+	public void updateNoteAdapter(){
+
+		noteAdapter.notifyDataSetChanged();
+
+	}
+
+	public class NotesListArrayAsyncTask extends AsyncTask<NotesList, Void, NoteListResponse> {
+
+		ApiException	apiexception;
+
+		@Override
+		protected void onPreExecute(){
+			super.onPreExecute();
+		}
+
+		@Override
+		protected NoteListResponse doInBackground(NotesList... params){
+
+			try {
+				return API.getNotesList(params[0].getSessionID());
+			} catch (ApiException e) {
+				apiexception = e;
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(NoteListResponse result){
+			super.onPostExecute(result);
+
+			if (result != null) {
+				switch (result.getNoteCreate()) {
+					case 0:
+						if (result.getNoteArray() != null) {
+							((MyApplication) getApplication()).getLocalData().setmNotes(result.getNoteArray());
+
+							if (noteAdapter != null) {
+								updateNoteAdapter();
+							}
+						}
+						break;
+					case 1:
+						if (result.getNoteArray() == null) {
+							Toast toast1 = Toast.makeText(NoteActivity.this, "You can create new note :)", Toast.LENGTH_LONG);
+							toast1.setGravity(Gravity.BOTTOM, 10, 50);
+							toast1.show();
+						}
+						break;
+				}
+			} else {
+				Toast toast1 = Toast.makeText(NoteActivity.this, "Exception", Toast.LENGTH_LONG);
 				toast1.setGravity(Gravity.BOTTOM, 10, 50);
 				toast1.show();
 			}

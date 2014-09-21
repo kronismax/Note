@@ -25,7 +25,7 @@ import android.util.Log;
 
 public class API {
 
-	public boolean setUser(String login, String password) {
+	public boolean setUser(String login, String password){
 
 		boolean userCreate = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
@@ -43,7 +43,7 @@ public class API {
 		return userCreate;
 	}
 
-	public boolean checkUser(String login, String password) {
+	public boolean checkUser(String login, String password){
 		boolean userExists = false;
 		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
 		for (int i = 0; i < mUsers.size(); i++) {
@@ -69,11 +69,11 @@ public class API {
 	// return chengPassword;
 	// }
 
-	public void putNote(String LOGIN, String NOTE, String NOTE_TITLE_NOTE) {
+	public void putNote(String LOGIN, String NOTE, String NOTE_TITLE_NOTE){
 		DataBaseUsers.getInstance().setNote(LOGIN, NOTE, NOTE_TITLE_NOTE);
 	}
 
-	public static Uri.Builder builder(String _oper) {
+	public static Uri.Builder builder(String _oper){
 
 		Uri.Builder builder = new Uri.Builder();
 
@@ -82,7 +82,7 @@ public class API {
 		return builder;
 	}
 
-	public static String GET(String url) throws ApiException {
+	public static String GET(String url) throws ApiException{
 
 		Log.d("e", "request:" + url);
 
@@ -108,14 +108,15 @@ public class API {
 	}
 
 	public static class LoginResponse {
-		public int result;
-		public String sessionId;
 
-		public int getResult() {
+		public int		result;
+		public String	sessionId;
+
+		public int getResult(){
 			return result;
 		}
 
-		public String getSessionID() {
+		public String getSessionID(){
 			return sessionId;
 		}
 
@@ -128,7 +129,7 @@ public class API {
 		}
 	}
 
-	public LoginResponse login(String login, String password) throws ApiException {
+	public LoginResponse login(String login, String password) throws ApiException{
 		try {
 			String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login=" + login + "&pass=" + password);
 			return new LoginResponse(new JSONObject(rawResponse));
@@ -137,7 +138,7 @@ public class API {
 		}
 	}
 
-	public RegisterResponse register(String login, String password) throws ApiException {
+	public RegisterResponse register(String login, String password) throws ApiException{
 		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/register?login=" + login + "&pass=" + password);
 		try {
 			return new RegisterResponse(new JSONObject(rawResponse));
@@ -148,7 +149,7 @@ public class API {
 
 	public static class RegisterResponse {
 
-		public int result;
+		public int	result;
 
 		public RegisterResponse() {
 		}
@@ -163,7 +164,7 @@ public class API {
 	}
 
 	// convert inputstream to String
-	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+	private static String convertInputStreamToString(InputStream inputStream) throws IOException{
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		String line = "";
 		String result = "";
@@ -175,18 +176,19 @@ public class API {
 	}
 
 	public static class ChengPasswordResponse {
-		int userChengPassword;
+
+		int	userChengPassword;
 
 		public ChengPasswordResponse(int userChengPassword) {
 			this.userChengPassword = userChengPassword;
 		}
 
-		public int getChengPasswordResponse() {
+		public int getChengPasswordResponse(){
 			return userChengPassword;
 		}
 	}
 
-	public ChengPasswordResponse chengPassword(String sessionID, String newPassword, String oldPassword) throws ApiException {
+	public ChengPasswordResponse chengPassword(String sessionID, String newPassword, String oldPassword) throws ApiException{
 		int userChengPassword;
 
 		Uri.Builder builder = API.builder("changePassword");
@@ -205,18 +207,19 @@ public class API {
 	}
 
 	public class LogOutResponse {
-		int userLogOut;
+
+		int	userLogOut;
 
 		public LogOutResponse(int userLogOut) {
 			this.userLogOut = userLogOut;
 		}
 
-		public int getChengPasswordResponse() {
+		public int getChengPasswordResponse(){
 			return userLogOut;
 		}
 	}
 
-	public LogOutResponse logOut(String ID) throws ApiException {
+	public LogOutResponse logOut(String ID) throws ApiException{
 		int userLogOut;
 
 		Uri.Builder builder = API.builder("logout");
@@ -234,24 +237,24 @@ public class API {
 
 	public class NewNoteResponse {
 
-		long ID;
-		int result;
+		long	ID;
+		int		result;
 
 		public NewNoteResponse(JSONObject json) throws JSONException {
 			result = json.getInt("result");
 			ID = json.getLong("noteID");
 		}
 
-		public long getNoteID() {
+		public long getNoteID(){
 			return ID;
 		}
 
-		public int getResult() {
+		public int getResult(){
 			return result;
 		}
 	}
 
-	public NewNoteResponse newNote(String id, String title, String text) throws ApiException {
+	public NewNoteResponse newNote(String id, String title, String text) throws ApiException{
 		String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/createNote?sessionID=" + id + "&title=" + title + "&content=" + text);
 		try {
 			return new NewNoteResponse(new JSONObject(rawResponse));
@@ -261,9 +264,10 @@ public class API {
 	}
 
 	public static class NoteResponse {
-		String title;
-		String shortContent;
-		long noteID;
+
+		String	title;
+		String	shortContent;
+		long	noteID;
 
 		public NoteResponse(JSONObject obj) throws JSONException {
 			this.title = obj.getString("title");
@@ -272,27 +276,28 @@ public class API {
 		}
 	}
 
-	ArrayList<NoteResponse> notes;
+	ArrayList<NoteResponse>	notes;
 
 	public class NoteListResponse {
-		int result;
-		ArrayList<Note> note;
 
-		public NoteListResponse(int noteListResponse, ArrayList<Note> note) {
+		int				result;
+		ArrayList<Note>	note;
+
+		public NoteListResponse(int noteListResponse,ArrayList<Note> note) {
 			this.result = noteListResponse;
 			this.note = note;
 		}
 
-		public int getNoteCreate() {
+		public int getNoteCreate(){
 			return result;
 		}
 
-		public ArrayList<Note> getNoteArray() {
+		public ArrayList<Note> getNoteArray(){
 			return note;
 		}
 	}
 
-	public NoteListResponse getNotesList(String ID) throws ApiException {
+	public NoteListResponse getNotesList(String ID) throws ApiException{
 		int noteCreate;
 		Note[] note;
 
@@ -323,36 +328,37 @@ public class API {
 	}
 
 	public class GetNoteResponse {
-		int getNoteResponse;
-		String title;
-		String content;
 
-		public GetNoteResponse(int getNoteResponse, String title, String content) {
+		int		getNoteResponse;
+		String	title;
+		String	content;
+
+		public GetNoteResponse(int getNoteResponse,String title,String content) {
 			this.getNoteResponse = getNoteResponse;
 			this.title = title;
 			this.content = content;
 		}
 
-		public int getGetNote() {
+		public int getGetNote(){
 			return getNoteResponse;
 		}
 
-		public String getTitle() {
+		public String getTitle(){
 			return title;
 		}
 
-		public String getContent() {
+		public String getContent(){
 			return content;
 		}
 	}
 
-	public GetNoteResponse getNote(String sessionID, Long noteID) throws ApiException {
+	public GetNoteResponse getNote(String sessionID, long noteID) throws ApiException{
 		int getNoteResponse;
 		String title;
 		String content;
 
 		Uri.Builder builder = API.builder("getNote");
-		Log.d("e", "id: "+noteID);
+		Log.d("e", "id: " + noteID);
 		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", Long.toString(noteID));
 		String a = GET(builder.build().toString());
 
@@ -365,6 +371,41 @@ public class API {
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
 		}
 		return new GetNoteResponse(getNoteResponse, title, content);
+	}
+
+	public class EditNoteResponse {
+
+		int	editNoteResponse;
+
+		public EditNoteResponse(int _edinNoteResponse) {
+			editNoteResponse = _edinNoteResponse;
+		}
+
+		public int getEditNoteResponse(){
+			return editNoteResponse;
+		}
+	}
+
+	public EditNoteResponse getEditNote(String _SessionID, long _NoteID, String _text) throws ApiException{
+		int EdinNoteResponse;
+
+		Uri.Builder builder = API.builder("editNote");
+
+		builder.appendQueryParameter("sessionID", _SessionID).appendQueryParameter("noteID", Long.toString(_NoteID)).appendQueryParameter("text", _text);
+
+		Log.d("EDIT_NOTE", builder.build().toString());
+
+		try {
+			JSONObject json = new JSONObject(GET(builder.build().toString()));
+
+			EdinNoteResponse = json.getInt("result");
+
+		} catch (Exception e) {
+			Log.d("GetNote", e.toString());
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+		}
+
+		return new EditNoteResponse(EdinNoteResponse);
 	}
 
 }
