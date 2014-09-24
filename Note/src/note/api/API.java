@@ -377,8 +377,8 @@ public class API {
 
 		int	editNoteResponse;
 
-		public EditNoteResponse(int _edinNoteResponse) {
-			editNoteResponse = _edinNoteResponse;
+		public EditNoteResponse(int edinNoteResponse) {
+			this.editNoteResponse = edinNoteResponse;
 		}
 
 		public int getEditNoteResponse(){

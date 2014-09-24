@@ -2,9 +2,11 @@ package note.model;
 
 import java.util.ArrayList;
 
+import android.util.Log;
+
 public class LocalData {
 
-	private Long			noteID;
+	private long			noteID;
 	private String			sessionID;
 	public ArrayList<Note>	mNotes	= new ArrayList<Note>();
 
@@ -28,13 +30,14 @@ public class LocalData {
 		return mNotes;
 	}
 
-	public Long getNoteID(){
+	public long getNoteID(){
 		return noteID;
 
 	}
 
 	public void addLocalNoteForIndex(String title, String content, long id, int position){
-		mNotes.add(position, new Note(title, content, id));
+		Log.d("Set title", "" + title);
+		mNotes.set(position, new Note(title, content, id));
 	}
 
 }

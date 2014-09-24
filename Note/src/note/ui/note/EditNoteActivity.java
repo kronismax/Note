@@ -32,9 +32,9 @@ public class EditNoteActivity extends Activity {
 		private long	noteID;
 		private String	sessionID;
 
-		public GetNote(String _sessionID,long _noteID) {
-			noteID = _noteID;
-			sessionID = _sessionID;
+		public GetNote(String sessionID,long noteID) {
+			this.noteID = noteID;
+			this.sessionID = sessionID;
 		}
 
 		public long getNoteID(){
@@ -85,10 +85,10 @@ public class EditNoteActivity extends Activity {
 		private String	sessionID;
 		private String	text;
 
-		public EditNote(String _sessionID,long _noteID,String _text) {
-			noteID = _noteID;
-			sessionID = _sessionID;
-			text = _text;
+		public EditNote(String sessionID,long noteID,String text) {
+			this.noteID = noteID;
+			this.sessionID = sessionID;
+			this.text = text;
 		}
 
 		public long getNoteID(){
