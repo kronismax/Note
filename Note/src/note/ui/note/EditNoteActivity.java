@@ -85,10 +85,10 @@ public class EditNoteActivity extends Activity {
 		private String	sessionID;
 		private String	text;
 
-		public EditNote(String _sessionID,long _noteID,String _text) {
-			noteID = _noteID;
-			sessionID = _sessionID;
-			text = _text;
+		public EditNote(String sessionID,long noteID,String text) {
+			this.noteID = noteID;
+			this.sessionID = sessionID;
+			this.text = text;
 		}
 
 		public long getNoteID(){
@@ -192,23 +192,14 @@ public class EditNoteActivity extends Activity {
 						getActionBar().setTitle(result.getTitle());
 
 						editNote.setText(result.getContent());
-
-						Toast toast = Toast.makeText(EditNoteActivity.this, "Невозможно редактировать", Toast.LENGTH_LONG);
-						toast.setGravity(Gravity.BOTTOM, 10, 50);
-						toast.show();
-
 						break;
-
 					case 2:
-
 						Toast toast1 = Toast.makeText(EditNoteActivity.this, "Что то не так", Toast.LENGTH_LONG);
 						toast1.setGravity(Gravity.BOTTOM, 10, 50);
 						toast1.show();
 
 						break;
-
 					default:
-
 						Toast toast2 = Toast.makeText(EditNoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
 						toast2.setGravity(Gravity.BOTTOM, 10, 50);
 						toast2.show();

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class LocalData {
 
-	private Long			noteID;
+	private long			noteID;
 	private String			sessionID;
 	public ArrayList<Note>	mNotes	= new ArrayList<Note>();
 
@@ -16,7 +16,7 @@ public class LocalData {
 		this.sessionID = sessionId;
 	}
 
-	public void setNoteID(Long noteID){
+	public void setNoteID(long noteID){
 		this.noteID = noteID;
 	}
 
@@ -28,13 +28,13 @@ public class LocalData {
 		return mNotes;
 	}
 
-	public Long getNoteID(){
+	public long getNoteID(){
 		return noteID;
 
 	}
 
 	public void addLocalNoteForIndex(String title, String content, long id, int position){
-		mNotes.add(position, new Note(title, content, id));
+		mNotes.set(position, new Note(title, content, id));
 	}
 
 }

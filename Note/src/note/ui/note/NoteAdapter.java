@@ -35,7 +35,7 @@ public class NoteAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position){
-		return position;
+		return ld.getmNotes().get(position).getId();
 	}
 
 	@Override
@@ -52,9 +52,5 @@ public class NoteAdapter extends BaseAdapter {
 
 		return view;
 
-	}
-
-	Note getNote(int position){
-		return ((Note) getItem(position));
 	}
 }

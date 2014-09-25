@@ -110,7 +110,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			} else {
 				if (result.getResult() == 0) {
 					((MyApplication) getActivity().getApplication()).getLocalData().setSessionId(result.sessionId);
-					Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
 					saveLastLogin();
 					Intent intent = new Intent(getActivity(), NoteActivity.class);
 					startActivity(intent);

@@ -7,7 +7,6 @@ import note.api.API.NoteListResponse;
 import note.api.ApiException;
 import note.ui.login.MainActivity;
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,7 +50,8 @@ public class NoteActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id){
 				Intent intent = new Intent(NoteActivity.this, EditNoteActivity.class);
 				intent.putExtra("POSITION", position);
-				intent.putExtra("NoteID", position);
+				intent.putExtra("ID", id);
+				Log.d("putExtra", ""+id);
 				startActivity(intent);
 			}
 		});
@@ -142,7 +142,6 @@ public class NoteActivity extends Activity {
 			case R.id.action_logOut:
 				Intent intentLogOut = new Intent(this, MainActivity.class);
 				startActivity(intentLogOut);
-				Toast.makeText(this, "Выход", Toast.LENGTH_SHORT).show();
 				return true;
 			case R.id.action_add:
 				Intent intentAdd = new Intent(this, NewNoteActivity.class);
@@ -262,14 +261,14 @@ public class NoteActivity extends Activity {
 						break;
 					case 1:
 						if (result.getNoteArray() == null) {
-							Toast toast1 = Toast.makeText(NoteActivity.this, "You can create new note :)", Toast.LENGTH_LONG);
+							Toast toast1 = Toast.makeText(NoteActivity.this, "Ну", Toast.LENGTH_LONG);
 							toast1.setGravity(Gravity.BOTTOM, 10, 50);
 							toast1.show();
 						}
 						break;
 				}
 			} else {
-				Toast toast1 = Toast.makeText(NoteActivity.this, "Exception", Toast.LENGTH_LONG);
+				Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
 				toast1.setGravity(Gravity.BOTTOM, 10, 50);
 				toast1.show();
 			}
