@@ -1,56 +1,39 @@
 package note.ui.note;
 
-import note.model.LocalData;
-import note.model.Note;
 import android.content.Context;
+import android.content.DialogInterface.OnClickListener;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.example.note.R;
 
-public class NoteAdapter extends BaseAdapter {
+public class NoteAdapter extends CursorAdapter {
 
-	Context			ctx;
-	LayoutInflater	lInflater;
-	LocalData		ld;
+	private LayoutInflater	mLayoutInflater;
+	private Context			mContext;
 
-	public NoteAdapter(Context context,LocalData ld) {
-		ctx = context;
-		this.ld = ld;
-		lInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	public NoteAdapter(Context context,Cursor cursor) {
+		super(context, cursor);
+		mContext = context;
+		mLayoutInflater = LayoutInflater.from(context);
 	}
 
 	@Override
-	public int getCount(){
-		return ld.getmNotes().size();
+	public View newView(Context context, Cursor cursor, ViewGroup parent){
+		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+		View retView = inflater.inflate(R.layout.list, parent, false);
+		return retView;
 	}
 
 	@Override
-	public Note getItem(int position){
-		return ld.getmNotes().get(position);
-	}
+	public void bindView(View view, Context context, final Cursor cursor){
 
-	@Override
-	public long getItemId(int position){
-		return ld.getmNotes().get(position).getId();
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent){
-		View view = convertView;
-		if (view == null) {
-			view = lInflater.inflate(R.layout.list, parent, false);
-		}
-
-		Note d = getItem(position);
-
-		((TextView) view.findViewById(R.id.noteName)).setText(d.getTitle());
-		((TextView) view.findViewById(R.id.noteSubtitle)).setText(d.getDescription());
-
-		return view;
+		((TextView) view.findViewById(R.id.noteName)).setText(cursor.getString(cursor.getColumnIndex(cursor.getColumnName(1))));
+		((TextView) view.findViewById(R.id.noteSubtitle)).setText(cursor.getString(cursor.getColumnIndex(cursor.getColumnName(2))));
 
 	}
 }

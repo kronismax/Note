@@ -8,6 +8,7 @@ import note.api.ApiException;
 import note.ui.login.MainActivity;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,7 +39,7 @@ public class NoteActivity extends Activity {
 
 		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 
-		noteAdapter = new NoteAdapter(this, ((MyApplication) getApplication()).getLocalData());
+		noteAdapter = new NoteAdapter(this, (Cursor) ((MyApplication) getApplication()).getLocalData());
 
 		// buttonDelete = (Button) findViewById(R.id.buttonDelete);
 
@@ -51,7 +52,6 @@ public class NoteActivity extends Activity {
 				Intent intent = new Intent(NoteActivity.this, EditNoteActivity.class);
 				intent.putExtra("POSITION", position);
 				intent.putExtra("ID", id);
-				Log.d("putExtra", ""+id);
 				startActivity(intent);
 			}
 		});
