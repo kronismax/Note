@@ -1,7 +1,6 @@
 package note.ui.note;
 
 import android.content.Context;
-import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -5,6 +5,8 @@ import note.api.API;
 import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
+import note.model.DataBase.DBHelper;
+import note.model.DataBase.NoteDatabaseColumns;
 import note.ui.login.MainActivity;
 import android.app.Activity;
 import android.content.Intent;
@@ -27,21 +29,30 @@ import com.example.note.R;
 public class NoteActivity extends Activity {
 
 	String		LOGIN;
-	NoteAdapter	noteAdapter;
-	Button		buttonDelete;
-	ListView	lv;
-	API			API	= new API();
+	NoteAdapter noteAdapter;
+	Button buttonDelete;
+	ListView lv;
+	API API = new API();
+	
+	DBHelper db;
 
+	String[] myColumns = { NoteDatabaseColumns.TableNote._ID,
+			   			   NoteDatabaseColumns.TableNote.TITLE,
+			   			   NoteDatabaseColumns.TableNote.CONTENT };
+	
 	@Override
-	public void onCreate(Bundle savedInstanceState){
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.note_activity);
 
-		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+		new NotesListArrayAsyncTask().execute(new NotesList(
+				((MyApplication) getApplication()).getLocalData().getSessionId()));
 
-		noteAdapter = new NoteAdapter(this, (Cursor) ((MyApplication) getApplication()).getLocalData());
+		DBHelper db = new DBHelper(this);
 
-		// buttonDelete = (Button) findViewById(R.id.buttonDelete);
+		noteAdapter = new NoteAdapter(this, db.getReadableDatabase().query(
+				DBHelper.DATABASE_NAME, myColumns, null, null, null, null,
+				DBHelper.ID));
 
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
@@ -97,10 +108,16 @@ public class NoteActivity extends Activity {
 
 			if (result != null) {
 				switch (result.getNoteCreate()) {
-					case 0:
-						if (result.getNoteArray() != null) {
-							((MyApplication) getApplication()).getLocalData().setmNotes(result.getNoteArray());
-						}
+				case 0:
+					if (result.getNoteArray() != null) {
+
+						Cursor c = db.getReadableDatabase().query(
+								DBHelper.DATABASE_NAME, myColumns, null, null,
+								null, null, DBHelper.ID);
+
+						noteAdapter.swapCursor(c);
+
+					}
 						break;
 					case 1:
 						if (result.getNoteArray() == null) {
@@ -252,7 +269,8 @@ public class NoteActivity extends Activity {
 				switch (result.getNoteCreate()) {
 					case 0:
 						if (result.getNoteArray() != null) {
-							((MyApplication) getApplication()).getLocalData().setmNotes(result.getNoteArray());
+						db.getReadableDatabase().query(DBHelper.DATABASE_NAME,
+								myColumns, null, null, null, null, DBHelper.ID);
 
 							if (noteAdapter != null) {
 								updateNoteAdapter();

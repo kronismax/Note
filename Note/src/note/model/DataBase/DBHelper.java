@@ -15,22 +15,21 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	private static final String	DROP_TABLE			= "DROP TABLE IF EXISTS ";
 
-	public interface NoteTable {
+	public interface Tables {
 
 		String	TABLE_NOTE	= "tableNote";
 	}
 
 	 private static final String CREATE_TABLE_NOTE = "CREATE TABLE "
-			   + NoteTable.TABLE_NOTE + " ("
+			   + Tables.TABLE_NOTE + " ("
 			   + TableNote._ID        + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 			   + TableNote.TITLE      + " TEXT, "
-			   + TableNote.CONTENT    + " TEXT, "
-			   + TableNote.NOTE_ID    + " INTEGER)";
+			   + TableNote.CONTENT    + " TEXT)";
 
 	
 
-	public DBHelper(Context context,String name,CursorFactory factory,int version) {
-		super(context, name, factory, version);
+	public DBHelper(Context context) {
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
 	@Override
@@ -40,7 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-		 db.execSQL(DROP_TABLE + NoteTable.TABLE_NOTE);   
+		 db.execSQL(DROP_TABLE + Tables.TABLE_NOTE);   
 		  onCreate(db);
 	}
 
