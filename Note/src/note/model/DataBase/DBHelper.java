@@ -11,7 +11,6 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String	DATABASE_NAME		= "mydatabase.db";
 	private static final int	VERSION_INITIAL		= 1;
 	private static final int	DATABASE_VERSION	= VERSION_INITIAL;
-
 	public static final String	ID					= "id";
 
 	private static final String	DROP_TABLE			= "DROP TABLE IF EXISTS ";
