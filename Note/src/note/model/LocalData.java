@@ -1,22 +1,21 @@
 package note.model;
 
-import java.util.ArrayList;
-
 public class LocalData {
 
-	private String			sessionID;
+	private String	sessionID;
+
+	public String getSessionId(){
+		return sessionID;
+	}
+
+	public void setSessionId(String sessionId){
+		this.sessionID = sessionId;
+	}
 	
 	/*private long			noteID;
 	
 	public ArrayList<Note>	mNotes	= new ArrayList<Note>();*/
 
-	public String getSessionId() {
-		return sessionID;
-	}
-
-	public void setSessionId(String sessionId) {
-		this.sessionID = sessionId;
-	}
 /*
 	public void setmNotes(ArrayList<Note> mNotes) {
 		this.mNotes = mNotes;

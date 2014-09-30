@@ -4,12 +4,12 @@ import note.MyApplication;
 import note.api.API;
 import note.api.API.NewNoteResponse;
 import note.api.ApiException;
-import note.api.API.LoginResponse;
 import note.model.Note;
-import note.ui.login.LoginFragment.LoginRequest;
-import note.ui.login.LoginFragment.MyAsyncTask;
+import note.model.DataBase.DBHelper;
+import note.model.DataBase.NoteDatabaseColumns;
 import note.utils.UIUtils;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,6 +29,8 @@ public class NewNoteActivity extends Activity {
 	protected EditText	titleNote;
 	protected Intent	intent;
 	protected Note		note	= new Note();
+	NoteAdapter noteAdapter;
+	DBHelper db;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -40,6 +42,13 @@ public class NewNoteActivity extends Activity {
 		titleNote = (EditText) findViewById(R.id.titleNote);
 
 		intent = getIntent();
+
+		DBHelper db = new DBHelper(this);
+
+		String[] myContent = { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
+		DBHelper userDataBaseHelper = new DBHelper(this);
+		noteAdapter = new NoteAdapter(this, (userDataBaseHelper.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, DBHelper.ID)));
+
 	}
 
 	@Override
@@ -58,7 +67,8 @@ public class NewNoteActivity extends Activity {
 				if (!NOTE_TITLE_NOTE.equals("")) {
 					note.setDescription(NOTE);
 					note.setTitle(NOTE_TITLE_NOTE);
-					((MyApplication) getApplication()).getLocalData().mNotes.add(note);
+					ContentValues contentValues = new ContentValues();
+					db.getWritableDatabase().replace(DBHelper.DATABASE_NAME, null, contentValues);
 					API.putNote(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE, NOTE_TITLE_NOTE);
 					MyAsyncTask mt;
 					mt = new MyAsyncTask();

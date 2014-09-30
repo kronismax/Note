@@ -3,7 +3,6 @@ package note.model.DataBase;
 import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -35,6 +34,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db){
 		db.execSQL(CREATE_TABLE_NOTE);
+		//onCreate(db);
 	}
 
 	@Override
