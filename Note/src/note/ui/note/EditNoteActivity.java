@@ -119,8 +119,8 @@ public class EditNoteActivity extends Activity {
 		protected EditNoteResponse doInBackground(EditNote... params){
 
 			try {
-				((MyApplication) getApplication()).getLocalData().addLocalNoteForIndex(getActionBar().getTitle().toString(), params[0].text,
-						getIntent().getLongExtra(LONG_EXTRA, -1), getIntent().getIntExtra(INT_EXTRA, -1));
+//				((MyApplication) getApplication()).getLocalData().addLocalNoteForIndex(getActionBar().getTitle().toString(), params[0].text,
+//						getIntent().getLongExtra(LONG_EXTRA, -1), getIntent().getIntExtra(INT_EXTRA, -1));
 				return API.getEditNote(params[0].sessionID, params[0].noteID, params[0].text);
 			} catch (ApiException e) {
 				apiexception = e;

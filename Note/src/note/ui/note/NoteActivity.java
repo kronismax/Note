@@ -5,14 +5,15 @@ import note.api.API;
 import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
+import note.model.Note;
 import note.model.DataBase.DBHelper;
 import note.model.DataBase.NoteDatabaseColumns;
+import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.CursorJoiner.Result;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -35,9 +37,9 @@ public class NoteActivity extends Activity {
 	Button		buttonDelete;
 	ListView	lv;
 	API			API			= new API();
-	DBHelper	db;
-	Cursor		c;
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
+	Cursor c;
+	DBHelper db;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -46,26 +48,9 @@ public class NoteActivity extends Activity {
 
 		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 
-		DBHelper db = new DBHelper(this);
+		db = new DBHelper(this);
 
-		noteAdapter = new NoteAdapter(this, db.getReadableDatabase().query(DBHelper.DATABASE_NAME, myColumns, null, null, null, null, DBHelper.ID));
-
-		for (note.api.API.NoteResponse item : ) {
-			/* API.NoteResponse item : result.getNotesArray() */
-			ContentValues contentValues = new ContentValues();
-			contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.title);
-			contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.shortContent);
-			contentValues.put(NoteDatabaseColumns.TableNote._ID, item.noteID);
-			db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
-			String[] myContent = { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
-			c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, DBHelper.ID);
-			noteAdapter.swapCursor(c);
-		}
-		if (noteAdapter != null) {
-			noteAdapter.notifyDataSetChanged();
-		}
-
-		noteAdapter.swapCursor(c);
+		noteAdapter = new NoteAdapter(this, db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID));
 
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
@@ -123,11 +108,7 @@ public class NoteActivity extends Activity {
 				switch (result.getNoteCreate()) {
 					case 0:
 						if (result.getNoteArray() != null) {
-
-							Cursor c = db.getReadableDatabase().query(DBHelper.DATABASE_NAME, myColumns, null, null, null, null, DBHelper.ID);
-
-							noteAdapter.swapCursor(c);
-
+							updateNoteAdapter();
 						}
 						break;
 					case 1:
@@ -148,7 +129,7 @@ public class NoteActivity extends Activity {
 
 	@Override
 	protected void onResume(){
-		updateNoteAdapter();
+		//updateNoteAdapter();
 		super.onResume();
 	}
 
@@ -246,9 +227,11 @@ public class NoteActivity extends Activity {
 	}
 
 	public void updateNoteAdapter(){
-
-		noteAdapter.notifyDataSetChanged();
-
+		if (noteAdapter != null) {
+			DBHelper db = new DBHelper(this);
+			c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+			noteAdapter.swapCursor(c);
+		}
 	}
 
 	public class NotesListArrayAsyncTask extends AsyncTask<NotesList, Void, NoteListResponse> {
@@ -281,15 +264,16 @@ public class NoteActivity extends Activity {
 					case 0:
 						if (result.getNoteArray() != null) {
 							ContentValues contentValues = new ContentValues();
-
-							db.getWritableDatabase().replace(DBHelper.DATABASE_NAME, null, contentValues);
-
-							Cursor c = db.getReadableDatabase().query(DBHelper.DATABASE_NAME, myColumns, null, null, null, null, DBHelper.ID);
-
-							noteAdapter.swapCursor(c);
-							if (noteAdapter != null) {
-								updateNoteAdapter();
+							for(Note item : result.getNoteArray()) {
+								contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.getTitle());
+								contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.getDescription());
+								contentValues.put(NoteDatabaseColumns.TableNote._ID, item.getId());
+								db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+								
 							}
+							
+							c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+							noteAdapter.swapCursor(c);
 						}
 						break;
 					case 1:

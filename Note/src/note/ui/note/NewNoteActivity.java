@@ -7,6 +7,7 @@ import note.api.ApiException;
 import note.model.Note;
 import note.model.DataBase.DBHelper;
 import note.model.DataBase.NoteDatabaseColumns;
+import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.ContentValues;
@@ -47,7 +48,7 @@ public class NewNoteActivity extends Activity {
 
 		String[] myContent = { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
 		DBHelper userDataBaseHelper = new DBHelper(this);
-		noteAdapter = new NoteAdapter(this, (userDataBaseHelper.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, DBHelper.ID)));
+		noteAdapter = new NoteAdapter(this, (userDataBaseHelper.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
 
 	}
 
@@ -68,7 +69,7 @@ public class NewNoteActivity extends Activity {
 					note.setDescription(NOTE);
 					note.setTitle(NOTE_TITLE_NOTE);
 					ContentValues contentValues = new ContentValues();
-					db.getWritableDatabase().replace(DBHelper.DATABASE_NAME, null, contentValues);
+					db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
 					API.putNote(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE, NOTE_TITLE_NOTE);
 					MyAsyncTask mt;
 					mt = new MyAsyncTask();
