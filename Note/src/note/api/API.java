@@ -265,9 +265,9 @@ public class API {
 
 	public static class NoteResponse {
 
-		String	title;
-		String	shortContent;
-		long	noteID;
+		public String	title;
+		public String	shortContent;
+		public long		noteID;
 
 		public NoteResponse(JSONObject obj) throws JSONException {
 			this.title = obj.getString("title");

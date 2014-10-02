@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.CursorJoiner.Result;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +36,7 @@ public class NoteActivity extends Activity {
 	ListView	lv;
 	API			API			= new API();
 	DBHelper	db;
+	Cursor		c;
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
 
 	@Override
@@ -47,6 +49,23 @@ public class NoteActivity extends Activity {
 		DBHelper db = new DBHelper(this);
 
 		noteAdapter = new NoteAdapter(this, db.getReadableDatabase().query(DBHelper.DATABASE_NAME, myColumns, null, null, null, null, DBHelper.ID));
+
+		for (note.api.API.NoteResponse item : ) {
+			/* API.NoteResponse item : result.getNotesArray() */
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.title);
+			contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.shortContent);
+			contentValues.put(NoteDatabaseColumns.TableNote._ID, item.noteID);
+			db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+			String[] myContent = { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
+			c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, DBHelper.ID);
+			noteAdapter.swapCursor(c);
+		}
+		if (noteAdapter != null) {
+			noteAdapter.notifyDataSetChanged();
+		}
+
+		noteAdapter.swapCursor(c);
 
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
@@ -262,11 +281,11 @@ public class NoteActivity extends Activity {
 					case 0:
 						if (result.getNoteArray() != null) {
 							ContentValues contentValues = new ContentValues();
-							
+
 							db.getWritableDatabase().replace(DBHelper.DATABASE_NAME, null, contentValues);
-							
+
 							Cursor c = db.getReadableDatabase().query(DBHelper.DATABASE_NAME, myColumns, null, null, null, null, DBHelper.ID);
-							
+
 							noteAdapter.swapCursor(c);
 							if (noteAdapter != null) {
 								updateNoteAdapter();
