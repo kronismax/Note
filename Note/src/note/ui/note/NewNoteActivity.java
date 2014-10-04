@@ -6,12 +6,14 @@ import note.api.API.NewNoteResponse;
 import note.api.ApiException;
 import note.model.Note;
 import note.model.DataBase.DBHelper;
+import note.model.DataBase.DBHelper.Tables;
 import note.model.DataBase.NoteDatabaseColumns;
 import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -25,13 +27,18 @@ import com.example.note.R;
 
 public class NewNoteActivity extends Activity {
 
-	protected API		API;
-	protected EditText	textNote;
-	protected EditText	titleNote;
-	protected Intent	intent;
-	protected Note		note	= new Note();
-	NoteAdapter noteAdapter;
-	DBHelper db;
+	protected API					API;
+	protected EditText				textNote;
+	protected EditText				titleNote;
+	protected Intent				intent;
+	protected Note					note		= new Note();
+	NoteAdapter						noteAdapter;
+	DBHelper						db;
+	public static final String[]	myContent	= { NoteDatabaseColumns.TableNote._ID, 
+													NoteDatabaseColumns.TableNote.TITLE, 
+													NoteDatabaseColumns.TableNote.CONTENT };
+
+	ContentValues					cv			= new ContentValues();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -46,9 +53,7 @@ public class NewNoteActivity extends Activity {
 
 		DBHelper db = new DBHelper(this);
 
-		String[] myContent = { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
-		DBHelper userDataBaseHelper = new DBHelper(this);
-		noteAdapter = new NoteAdapter(this, (userDataBaseHelper.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
+		noteAdapter = new NoteAdapter(this, (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
 
 	}
 
@@ -66,14 +71,11 @@ public class NewNoteActivity extends Activity {
 		switch (item.getItemId()) {
 			case R.id.action_save_new_note:
 				if (!NOTE_TITLE_NOTE.equals("")) {
-					note.setDescription(NOTE);
-					note.setTitle(NOTE_TITLE_NOTE);
-					ContentValues contentValues = new ContentValues();
-					db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
-					API.putNote(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE, NOTE_TITLE_NOTE);
-					MyAsyncTask mt;
-					mt = new MyAsyncTask();
-					mt.execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE_TITLE_NOTE, NOTE));
+					new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE_TITLE_NOTE, NOTE));
+
+					DBHelper db = new DBHelper(this);
+					db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, cv);
+					Cursor c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID));
 					return true;
 				} else {
 					Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
@@ -94,15 +96,30 @@ public class NewNoteActivity extends Activity {
 			this.title = title;
 			this.text = text;
 		}
+
+		public String getTitile(){
+			return title;
+		}
+
+		public String getContent(){
+			return text;
+		}
+
+		public String getSessionID(){
+			return sessionId;
+		}
+
 	}
 
 	public class MyAsyncTask extends AsyncTask<NewNoteRequest, Void, NewNoteResponse> {
 
 		ApiException	exception;
+		NewNoteRequest	request;
 
 		@Override
 		protected NewNoteResponse doInBackground(NewNoteRequest... params){
 			try {
+				request = params[0];
 				return new API().newNote(params[0].sessionId, params[0].title, params[0].text);
 			} catch (ApiException apIexception) {
 				exception = apIexception;
@@ -118,11 +135,19 @@ public class NewNoteActivity extends Activity {
 			} else {
 				if (result.getResult() == 0) {
 
+					DBHelper db = new DBHelper(NewNoteActivity.this);
+
+					cv.put(NoteDatabaseColumns.TableNote.TITLE, request.getTitile());
+					cv.put(NoteDatabaseColumns.TableNote.CONTENT, request.getContent());
+					cv.put(NoteDatabaseColumns.TableNote._ID, request.getSessionID());
+					db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, cv);
+					noteAdapter.notifyDataSetChanged();
+
 					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
 					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
-					
+
 				} else if (result.getResult() == 1) {
 					Toast toast = Toast.makeText(NewNoteActivity.this, "Неправильная сессия", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);

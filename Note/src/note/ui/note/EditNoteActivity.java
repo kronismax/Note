@@ -5,11 +5,16 @@ import note.api.API;
 import note.api.API.EditNoteResponse;
 import note.api.API.GetNoteResponse;
 import note.api.ApiException;
+import note.model.DataBase.DBHelper;
+import note.model.DataBase.NoteDatabaseColumns;
+import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import note.utils.UIUtils;
 import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,11 +26,19 @@ import com.example.note.R;
 
 public class EditNoteActivity extends Activity {
 
-	protected EditText		editNote;
-	protected String		title;
+	public static final String[]	myContent		= { NoteDatabaseColumns.TableNote._ID,
+														NoteDatabaseColumns.TableNote.TITLE, 
+														NoteDatabaseColumns.TableNote.CONTENT };
 
-	private final String	LONG_EXTRA	= "ID";
-	private final String	INT_EXTRA	= "POSITION";
+	protected EditText				editNote;
+	protected String				title;
+
+	private final String			LONG_EXTRA		= "ID";
+	private final String			INT_EXTRA		= "POSITION";
+
+	protected NoteAdapter			noteAdapter;
+	ContentValues					contentValues	= new ContentValues();
+	Cursor							c;
 
 	public class GetNote {
 
@@ -52,6 +65,9 @@ public class EditNoteActivity extends Activity {
 		setContentView(R.layout.edit_note);
 		editNote = (EditText) findViewById(R.id.editNote);
 
+		DBHelper db = new DBHelper(this);
+		noteAdapter = new NoteAdapter(this, c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
+
 		new GetNoteAsyncTask().execute(new GetNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1)));
 
 	};
@@ -67,12 +83,13 @@ public class EditNoteActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()) {
 			case R.id.action_edit_note:
-				Log.d("LONG", Long.toString(getIntent().getLongExtra(LONG_EXTRA, -1)));
 				new EditNoteAsyncTask().execute(new EditNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1), editNote
 						.getText().toString()));
+				Intent intent = new Intent(EditNoteActivity.this, NoteActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
 				finish();
 				break;
-
 			default:
 				break;
 		}
@@ -106,6 +123,7 @@ public class EditNoteActivity extends Activity {
 
 	public class EditNoteAsyncTask extends AsyncTask<EditNote, Void, EditNoteResponse> {
 
+		DBHelper		db	= new DBHelper(EditNoteActivity.this);
 		ApiException	apiexception;
 
 		@Override
@@ -119,8 +137,14 @@ public class EditNoteActivity extends Activity {
 		protected EditNoteResponse doInBackground(EditNote... params){
 
 			try {
-//				((MyApplication) getApplication()).getLocalData().addLocalNoteForIndex(getActionBar().getTitle().toString(), params[0].text,
-//						getIntent().getLongExtra(LONG_EXTRA, -1), getIntent().getIntExtra(INT_EXTRA, -1));
+				contentValues.put(NoteDatabaseColumns.TableNote._ID, params[0].getNoteID());
+				contentValues.put(NoteDatabaseColumns.TableNote.TITLE, params[0].text);
+
+				db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+				c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID);
+
+				noteAdapter.swapCursor(c);
+				noteAdapter.notifyDataSetChanged();
 				return API.getEditNote(params[0].sessionID, params[0].noteID, params[0].text);
 			} catch (ApiException e) {
 				apiexception = e;
@@ -138,6 +162,8 @@ public class EditNoteActivity extends Activity {
 			} else {
 				switch (result.getEditNoteResponse()) {
 					case 0:
+						noteAdapter.swapCursor(c);
+						noteAdapter.notifyDataSetChanged();
 						Toast toast = Toast.makeText(EditNoteActivity.this, "Красава", Toast.LENGTH_LONG);
 						toast.setGravity(Gravity.BOTTOM, 10, 50);
 						toast.show();
@@ -160,6 +186,7 @@ public class EditNoteActivity extends Activity {
 	public class GetNoteAsyncTask extends AsyncTask<GetNote, Void, GetNoteResponse> {
 
 		ApiException	apiexception;
+		GetNote			request;
 
 		@Override
 		protected void onPreExecute(){
@@ -170,6 +197,7 @@ public class EditNoteActivity extends Activity {
 		protected GetNoteResponse doInBackground(GetNote... params){
 			API API = new API();
 			try {
+				request = params[0];
 				return API.getNote(params[0].sessionID, params[0].noteID);
 			} catch (ApiException e) {
 				apiexception = e;
