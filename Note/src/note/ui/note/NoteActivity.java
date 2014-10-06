@@ -2,6 +2,7 @@ package note.ui.note;
 
 import note.MyApplication;
 import note.api.API;
+import note.api.API.DeleteNoteResponse;
 import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
@@ -55,6 +56,7 @@ public class NoteActivity extends Activity {
 		lv.setAdapter(noteAdapter);
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
+
 			@Override
 			public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id){
 				Intent intent = new Intent(NoteActivity.this, EditNoteActivity.class);
@@ -63,6 +65,15 @@ public class NoteActivity extends Activity {
 				startActivity(intent);
 			}
 		});
+		
+		noteAdapter.setOnDeleteClickListener(new NoteAdapter.OnDeleteItemListner() {
+					@Override
+					public void onItemDeleteClick(long id) {
+						if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(),id)) != null) {
+							new MyNotesListAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+						}
+					}
+				});
 	}
 
 	public class NotesList {
@@ -291,4 +302,67 @@ public class NoteActivity extends Activity {
 		}
 	}
 
+	public class DeleteNoteRequest {
+		private String sessionId;
+		private long noteId;
+
+		DeleteNoteRequest(String sessionId, long noteId) {
+			this.sessionId = sessionId;
+			this.noteId = noteId;
+		}
+
+		public String getSessionId() {
+			return sessionId;
+		}
+
+		public long getNoteId() {
+			return noteId;
+		}
+
+	}
+	
+	public class DeleteNoteAsyncTask extends AsyncTask<DeleteNoteRequest, Void, DeleteNoteResponse>{
+		
+		ApiException apiexception;
+		
+		@Override
+		protected DeleteNoteResponse doInBackground(DeleteNoteRequest... params) {
+			try {
+				return API.deleteNote(params[0].sessionId, params[0].noteId);
+			} catch (ApiException e) {
+				apiexception = e;
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(DeleteNoteResponse result) {
+			super.onPostExecute(result);
+
+			if (result != null) {
+				switch (result.noteId) {
+				case 0:
+					DBHelper db = new DBHelper(NoteActivity.this);
+					ContentValues cv = new ContentValues();
+					cv.remove(NoteDatabaseColumns.TableNote._ID);
+					db.getWritableDatabase().replace(NoteDatabaseColumns.TableNote._ID, null, cv);
+					noteAdapter.swapCursor(c);
+					break;
+				case 2:
+					Toast toast = Toast.makeText(NoteActivity.this, "Что то не так", Toast.LENGTH_LONG);
+					toast.setGravity(Gravity.BOTTOM, 10, 50);
+					toast.show();
+					break;
+				default:
+					Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
+					toast1.setGravity(Gravity.BOTTOM, 10, 50);
+					toast1.show();
+					break;
+
+				}
+			}
+		}
+			
+	}
 }

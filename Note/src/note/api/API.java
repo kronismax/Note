@@ -377,8 +377,8 @@ public class API {
 
 		int	editNoteResponse;
 
-		public EditNoteResponse(int edinNoteResponse) {
-			this.editNoteResponse = edinNoteResponse;
+		public EditNoteResponse(int editNoteResponse) {
+			this.editNoteResponse = editNoteResponse;
 		}
 
 		public int getEditNoteResponse(){
@@ -387,7 +387,7 @@ public class API {
 	}
 
 	public EditNoteResponse getEditNote(String _SessionID, long _NoteID, String _text) throws ApiException{
-		int EdinNoteResponse;
+		int EditNoteResponse;
 
 		Uri.Builder builder = API.builder("editNote");
 
@@ -398,14 +398,43 @@ public class API {
 		try {
 			JSONObject json = new JSONObject(GET(builder.build().toString()));
 
-			EdinNoteResponse = json.getInt("result");
+			EditNoteResponse = json.getInt("result");
 
 		} catch (Exception e) {
 			Log.d("GetNote", e.toString());
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
 		}
 
-		return new EditNoteResponse(EdinNoteResponse);
+		return new EditNoteResponse(EditNoteResponse);
+	}
+	
+	public class DeleteNoteResponse {
+		public int noteId;
+
+		public DeleteNoteResponse(JSONObject obj) throws JSONException {
+			noteId = obj.getInt("noteId");
+		}
+		
+		public DeleteNoteResponse(int deleteNoteResponse) {
+			this.noteId = deleteNoteResponse;
+		}
+		
+	}
+	
+	public DeleteNoteResponse deleteNote(String sessionId, long noteId) throws ApiException {
+		int deleteNoteResponse;
+		Uri.Builder builder = API.builder("deleteNote");
+		builder.appendQueryParameter("sessionID", sessionId).appendQueryParameter("noteID", Long.toString(noteId));
+
+		try {
+			JSONObject json = new JSONObject(GET(builder.build().toString()));
+			deleteNoteResponse = json.getInt("result");
+			DeleteNoteResponse delete = new DeleteNoteResponse(new JSONObject());
+		} catch (Exception e) {
+			Log.d("GetNote", e.toString());
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+		}
+		return new DeleteNoteResponse(deleteNoteResponse);
 	}
 
 }
