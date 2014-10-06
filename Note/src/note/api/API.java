@@ -388,18 +388,12 @@ public class API {
 
 	public EditNoteResponse getEditNote(String _SessionID, long _NoteID, String _text) throws ApiException{
 		int EditNoteResponse;
-
 		Uri.Builder builder = API.builder("editNote");
-
 		builder.appendQueryParameter("sessionID", _SessionID).appendQueryParameter("noteID", Long.toString(_NoteID)).appendQueryParameter("text", _text);
-
 		Log.d("EDIT_NOTE", builder.build().toString());
-
 		try {
 			JSONObject json = new JSONObject(GET(builder.build().toString()));
-
 			EditNoteResponse = json.getInt("result");
-
 		} catch (Exception e) {
 			Log.d("GetNote", e.toString());
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
@@ -409,14 +403,10 @@ public class API {
 	}
 	
 	public class DeleteNoteResponse {
-		public int noteId;
+		public int result;
 
-		public DeleteNoteResponse(JSONObject obj) throws JSONException {
-			noteId = obj.getInt("noteId");
-		}
-		
 		public DeleteNoteResponse(int deleteNoteResponse) {
-			this.noteId = deleteNoteResponse;
+			this.result = deleteNoteResponse;
 		}
 		
 	}
@@ -429,9 +419,8 @@ public class API {
 		try {
 			JSONObject json = new JSONObject(GET(builder.build().toString()));
 			deleteNoteResponse = json.getInt("result");
-			DeleteNoteResponse delete = new DeleteNoteResponse(new JSONObject());
+
 		} catch (Exception e) {
-			Log.d("GetNote", e.toString());
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
 		}
 		return new DeleteNoteResponse(deleteNoteResponse);

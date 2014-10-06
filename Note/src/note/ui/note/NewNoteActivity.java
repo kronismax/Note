@@ -6,7 +6,6 @@ import note.api.API.NewNoteResponse;
 import note.api.ApiException;
 import note.model.Note;
 import note.model.DataBase.DBHelper;
-import note.model.DataBase.DBHelper.Tables;
 import note.model.DataBase.NoteDatabaseColumns;
 import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import note.utils.UIUtils;
@@ -38,7 +37,7 @@ public class NewNoteActivity extends Activity {
 													NoteDatabaseColumns.TableNote.TITLE, 
 													NoteDatabaseColumns.TableNote.CONTENT };
 
-	ContentValues					cv			= new ContentValues();
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -72,10 +71,6 @@ public class NewNoteActivity extends Activity {
 			case R.id.action_save_new_note:
 				if (!NOTE_TITLE_NOTE.equals("")) {
 					new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE_TITLE_NOTE, NOTE));
-
-					DBHelper db = new DBHelper(this);
-					db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, cv);
-					Cursor c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID));
 					return true;
 				} else {
 					Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
@@ -136,7 +131,7 @@ public class NewNoteActivity extends Activity {
 				if (result.getResult() == 0) {
 
 					DBHelper db = new DBHelper(NewNoteActivity.this);
-
+					ContentValues cv = new ContentValues();
 					cv.put(NoteDatabaseColumns.TableNote.TITLE, request.getTitile());
 					cv.put(NoteDatabaseColumns.TableNote.CONTENT, request.getContent());
 					cv.put(NoteDatabaseColumns.TableNote._ID, request.getSessionID());

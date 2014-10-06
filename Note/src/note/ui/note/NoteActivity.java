@@ -8,9 +8,11 @@ import note.api.API.NoteListResponse;
 import note.api.ApiException;
 import note.model.Note;
 import note.model.DataBase.DBHelper;
+import note.model.DataBase.DBHelper.Tables;
 import note.model.DataBase.NoteDatabaseColumns;
 import note.model.DataBase.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
+import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -38,7 +40,6 @@ public class NoteActivity extends Activity {
 	ListView	lv;
 	API			API			= new API();
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
-	Cursor c;
 	DBHelper db;
 
 	@Override
@@ -49,9 +50,8 @@ public class NoteActivity extends Activity {
 		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 
 		db = new DBHelper(this);
-
 		noteAdapter = new NoteAdapter(this, db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID));
-
+		
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -70,7 +70,7 @@ public class NoteActivity extends Activity {
 					@Override
 					public void onItemDeleteClick(long id) {
 						if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(),id)) != null) {
-							new MyNotesListAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+							//new MyNotesListAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 						}
 					}
 				});
@@ -239,7 +239,8 @@ public class NoteActivity extends Activity {
 	public void updateNoteAdapter(){
 		if (noteAdapter != null) {
 			DBHelper db = new DBHelper(this);
-			c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+			Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+			Log.d("cursor size", "" + c.getCount());
 			noteAdapter.swapCursor(c);
 		}
 	}
@@ -282,7 +283,7 @@ public class NoteActivity extends Activity {
 								
 							}
 							
-							c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+							Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
 							noteAdapter.swapCursor(c);
 						}
 						break;
@@ -324,10 +325,13 @@ public class NoteActivity extends Activity {
 	public class DeleteNoteAsyncTask extends AsyncTask<DeleteNoteRequest, Void, DeleteNoteResponse>{
 		
 		ApiException apiexception;
+		long deleteNoteId;
 		
 		@Override
 		protected DeleteNoteResponse doInBackground(DeleteNoteRequest... params) {
 			try {
+				deleteNoteId = params[0].noteId;
+				Log.d("Note id doIn", ":" + deleteNoteId);
 				return API.deleteNote(params[0].sessionId, params[0].noteId);
 			} catch (ApiException e) {
 				apiexception = e;
@@ -339,15 +343,16 @@ public class NoteActivity extends Activity {
 		@Override
 		protected void onPostExecute(DeleteNoteResponse result) {
 			super.onPostExecute(result);
-
+			
 			if (result != null) {
-				switch (result.noteId) {
+				switch (result.result) {
 				case 0:
-					DBHelper db = new DBHelper(NoteActivity.this);
-					ContentValues cv = new ContentValues();
-					cv.remove(NoteDatabaseColumns.TableNote._ID);
-					db.getWritableDatabase().replace(NoteDatabaseColumns.TableNote._ID, null, cv);
-					noteAdapter.swapCursor(c);
+//					DBHelper db = new DBHelper(NoteActivity.this);
+//					db.getWritableDatabase().delete(Tables.TABLE_NOTE, 
+//							NoteDatabaseColumns.TableNote._ID + " = ?", 
+//							new String[] {String.valueOf(deleteNoteId)});
+//					db.close();
+					updateNoteAdapter();
 					break;
 				case 2:
 					Toast toast = Toast.makeText(NoteActivity.this, "Что то не так", Toast.LENGTH_LONG);
@@ -361,6 +366,8 @@ public class NoteActivity extends Activity {
 					break;
 
 				}
+			} else {
+				UIUtils.showToastByException(NoteActivity.this, apiexception);
 			}
 		}
 			
