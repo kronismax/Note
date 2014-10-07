@@ -73,11 +73,11 @@ public class API {
 		DataBaseUsers.getInstance().setNote(LOGIN, NOTE, NOTE_TITLE_NOTE);
 	}
 
-	public static Uri.Builder builder(String _oper){
+	public static Uri.Builder builder(String oper){
 
 		Uri.Builder builder = new Uri.Builder();
 
-		builder.scheme("http").encodedAuthority("notes-androidcoursesdp.rhcloud.com").appendPath("REST").appendPath(_oper);
+		builder.scheme("http").encodedAuthority("notes-androidcoursesdp.rhcloud.com").appendPath("REST").appendPath(oper);
 
 		return builder;
 	}
@@ -386,10 +386,10 @@ public class API {
 		}
 	}
 
-	public EditNoteResponse getEditNote(String _SessionID, long _NoteID, String _text) throws ApiException{
+	public EditNoteResponse getEditNote(String sessionID, long noteID, String text) throws ApiException{
 		int EditNoteResponse;
 		Uri.Builder builder = API.builder("editNote");
-		builder.appendQueryParameter("sessionID", _SessionID).appendQueryParameter("noteID", Long.toString(_NoteID)).appendQueryParameter("text", _text);
+		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", Long.toString(noteID)).appendQueryParameter("text", text);
 		Log.d("EDIT_NOTE", builder.build().toString());
 		try {
 			JSONObject json = new JSONObject(GET(builder.build().toString()));
