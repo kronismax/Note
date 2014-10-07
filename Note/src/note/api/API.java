@@ -401,17 +401,18 @@ public class API {
 
 		return new EditNoteResponse(EditNoteResponse);
 	}
-	
+
 	public class DeleteNoteResponse {
-		public int result;
+
+		public int	result;
 
 		public DeleteNoteResponse(int deleteNoteResponse) {
 			this.result = deleteNoteResponse;
 		}
-		
+
 	}
-	
-	public DeleteNoteResponse deleteNote(String sessionId, long noteId) throws ApiException {
+
+	public DeleteNoteResponse deleteNote(String sessionId, long noteId) throws ApiException{
 		int deleteNoteResponse;
 		Uri.Builder builder = API.builder("deleteNote");
 		builder.appendQueryParameter("sessionID", sessionId).appendQueryParameter("noteID", Long.toString(noteId));

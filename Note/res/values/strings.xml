@@ -20,5 +20,6 @@
     <string name="titleNote">Заголовок</string>
     <string name="textNote">Текст</string>
     <string name="save_new_note">Сохранить</string>
+    <string name="RandomNotes">5 авто заметок</string>
 
 </resources>

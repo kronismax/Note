@@ -12,23 +12,25 @@ import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.note.R;
 
-public class NewNoteActivity extends Activity {
+public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 	protected API					API;
 	protected EditText				textNote;
 	protected EditText				titleNote;
+	protected Button				randomNotes;
 	protected Intent				intent;
 	protected Note					note		= new Note();
 	NoteAdapter						noteAdapter;
@@ -36,8 +38,6 @@ public class NewNoteActivity extends Activity {
 	public static final String[]	myContent	= { NoteDatabaseColumns.TableNote._ID, 
 													NoteDatabaseColumns.TableNote.TITLE, 
 													NoteDatabaseColumns.TableNote.CONTENT };
-
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -47,6 +47,8 @@ public class NewNoteActivity extends Activity {
 
 		textNote = (EditText) findViewById(R.id.textNote);
 		titleNote = (EditText) findViewById(R.id.titleNote);
+		randomNotes = (Button) findViewById(R.id.button1);
+		randomNotes.setOnClickListener(this);
 
 		intent = getIntent();
 
@@ -156,4 +158,13 @@ public class NewNoteActivity extends Activity {
 		}
 	}
 
+	@Override
+	public void onClick(View arg0){
+		for (int i = 1; i < 6; i++) {
+			new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
+		}
+
+		
+		
+	}
 }

@@ -28,4 +28,14 @@
         android:hint="@string/textNote"
         android:inputType="textMultiLine" />
 
+    <Button
+        android:id="@+id/button1"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textNote"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:text="5 Random Notes" />
+
 </LinearLayout>

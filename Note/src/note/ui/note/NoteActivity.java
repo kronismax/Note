@@ -39,8 +39,10 @@ public class NoteActivity extends Activity {
 	Button		buttonDelete;
 	ListView	lv;
 	API			API			= new API();
-	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
 	DBHelper	db;
+	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
+								NoteDatabaseColumns.TableNote.TITLE, 
+								NoteDatabaseColumns.TableNote.CONTENT };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -232,9 +234,7 @@ public class NoteActivity extends Activity {
 								contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.getDescription());
 								contentValues.put(NoteDatabaseColumns.TableNote._ID, item.getId());
 								db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
-
 							}
-
 							Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
 							noteAdapter.swapCursor(c);
 						}
@@ -316,7 +316,6 @@ public class NoteActivity extends Activity {
 						toast1.setGravity(Gravity.BOTTOM, 10, 50);
 						toast1.show();
 						break;
-
 				}
 			} else {
 				UIUtils.showToastByException(NoteActivity.this, apiexception);
