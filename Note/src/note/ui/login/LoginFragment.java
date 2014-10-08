@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	private EditText			LogText;
 	private EditText			PassText;
 	private Button				Login;
+	private Button 				Demo;
 	API							api				= new API();
 	MyAsyncTask					mt;
 	private static final String	PREF_SETTINGS	= "Settings";
@@ -43,6 +45,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		LogText = (EditText) view.findViewById(R.id.logText);
 		PassText = (EditText) view.findViewById(R.id.passText);
 		Login = (Button) view.findViewById(R.id.button1);
+		Demo = (Button) view.findViewById(R.id.ButtonDemo);
 		if (saveInstanceState == null) {
 			SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
 			String stringPreference = preferences.getString("login", "");
@@ -54,23 +57,56 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			}
 		}
 		Login.setOnClickListener(this);
+		Demo.setOnClickListener(this);
 	}
+	
+	public void onClick(View arg0) {
 
-	public void onClick(View arg0){
-		final String LOGIN = LogText.getText().toString();
-		final String PASS = PassText.getText().toString();
-		if (LOGIN.isEmpty() || PASS.isEmpty()) {
-			Toast toast = Toast.makeText(getActivity(), "Введите логин или пароль", Toast.LENGTH_SHORT);
-			toast.setGravity(Gravity.BOTTOM, 10, 50);
-			toast.show();
-		} else {
-			LoginRequest request = new LoginRequest();
-			request.login = LOGIN;
-			request.password = PASS;
+		switch (arg0.getId()) {
+		case R.id.ButtonDemo:
+			if (LogText.getText().toString() != null) {
+				final String LOGIN = LogText.getText().toString();
+				final String PASS = LOGIN;
+				Toast toast = Toast.makeText(getActivity(), ""+LOGIN, Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.BOTTOM, 10, 50);
+				toast.show();
 
-			Login.setEnabled(false);
-			mt = new MyAsyncTask();
-			mt.execute(request);
+				LoginRequest request = new LoginRequest();
+				request.login = LOGIN;
+				request.password = PASS;
+
+				Login.setEnabled(false);
+				mt = new MyAsyncTask();
+				mt.execute(request);
+
+			} else {
+				LoginRequest request = new LoginRequest();
+				request.login = "demo";
+				request.password = "demo";
+
+				Login.setEnabled(false);
+				mt = new MyAsyncTask();
+				mt.execute(request);
+			}
+			break;
+		case R.id.button1:
+			final String LOGIN = LogText.getText().toString();
+			final String PASS = PassText.getText().toString();
+			Log.d("Разве логин", "?");
+			if (LOGIN.isEmpty() || PASS.isEmpty()) {
+				Toast toast = Toast.makeText(getActivity(), "Введите логин или пароль", Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.BOTTOM, 10, 50);
+				toast.show();
+			} else {
+				LoginRequest request = new LoginRequest();
+				request.login = LOGIN;
+				request.password = PASS;
+
+				Login.setEnabled(false);
+				mt = new MyAsyncTask();
+				mt.execute(request);
+			}
+			break;
 		}
 	}
 
