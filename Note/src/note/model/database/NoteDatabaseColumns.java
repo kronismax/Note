@@ -1,4 +1,4 @@
-package note.model.DataBase;
+package note.model.database;
 
 public class NoteDatabaseColumns {
 

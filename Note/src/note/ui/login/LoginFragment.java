@@ -64,7 +64,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 		switch (arg0.getId()) {
 			case R.id.ButtonDemo:
-				if (LogText.getText().toString() != null) {
+				if (!TextUtils.isEmpty(LogText.getText())) {
 					final String LOGIN = LogText.getText().toString();
 					final String PASS = LOGIN;
 					Toast toast = Toast.makeText(getActivity(), "" + LOGIN, Toast.LENGTH_SHORT);

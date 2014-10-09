@@ -1,6 +1,6 @@
-package note.model.DataBase;
+package note.model.database;
 
-import note.model.DataBase.NoteDatabaseColumns.TableNote;
+import note.model.database.NoteDatabaseColumns.TableNote;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;

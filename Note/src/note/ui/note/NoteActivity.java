@@ -7,10 +7,11 @@ import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
 import note.model.Note;
-import note.model.DataBase.DBHelper;
-import note.model.DataBase.DBHelper.Tables;
-import note.model.DataBase.NoteDatabaseColumns;
-import note.model.DataBase.NoteDatabaseColumns.TableNote;
+import note.model.database.DBHelper;
+import note.model.database.MyContentProvider;
+import note.model.database.NoteDatabaseColumns;
+import note.model.database.DBHelper.Tables;
+import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import note.utils.UIUtils;
 import android.app.Activity;
@@ -50,9 +51,9 @@ public class NoteActivity extends Activity {
 		setContentView(R.layout.note_activity);
 
 		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
-
+		
 		db = new DBHelper(this);
-		noteAdapter = new NoteAdapter(this, db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID));
+		noteAdapter = new NoteAdapter(this, getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID));
 
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
