@@ -5,7 +5,7 @@ import note.api.API;
 import note.api.API.EditNoteResponse;
 import note.api.API.GetNoteResponse;
 import note.api.ApiException;
-import note.model.database.DBHelper;
+import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.model.database.NoteDatabaseColumns.TableNote;
 import note.utils.UIUtils;
@@ -26,16 +26,12 @@ import com.example.note.R;
 
 public class EditNoteActivity extends Activity {
 
-	public static final String[]	myContent		= { NoteDatabaseColumns.TableNote._ID,
-														NoteDatabaseColumns.TableNote.TITLE, 
-														NoteDatabaseColumns.TableNote.CONTENT };
+	public static final String[]	myColumns		= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
 
 	protected EditText				editNote;
 	protected String				title;
-
 	private final String			LONG_EXTRA		= "ID";
 	private final String			INT_EXTRA		= "POSITION";
-
 	protected NoteAdapter			noteAdapter;
 	ContentValues					contentValues	= new ContentValues();
 	Cursor							c;
@@ -65,11 +61,12 @@ public class EditNoteActivity extends Activity {
 		setContentView(R.layout.edit_note);
 		editNote = (EditText) findViewById(R.id.editNote);
 
-		DBHelper db = new DBHelper(this);
-		noteAdapter = new NoteAdapter(this, c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
-
+		//DBHelper db = new DBHelper(this);
+		//noteAdapter = new NoteAdapter(this, c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
+		noteAdapter = new NoteAdapter(this, c = (getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID)));
+		
 		new GetNoteAsyncTask().execute(new GetNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1)));
-
+		editNote.requestFocus();
 	};
 
 	@Override
@@ -123,7 +120,7 @@ public class EditNoteActivity extends Activity {
 
 	public class EditNoteAsyncTask extends AsyncTask<EditNote, Void, EditNoteResponse> {
 
-		DBHelper		db	= new DBHelper(EditNoteActivity.this);
+		//DBHelper		db	= new DBHelper(EditNoteActivity.this);
 		ApiException	apiexception;
 
 		@Override
@@ -140,8 +137,12 @@ public class EditNoteActivity extends Activity {
 				contentValues.put(NoteDatabaseColumns.TableNote._ID, params[0].getNoteID());
 				contentValues.put(NoteDatabaseColumns.TableNote.TITLE, params[0].text);
 
-				db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
-				c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID);
+				//db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+				//c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+				
+				getContentResolver().update(MyContentProvider.URI_NOTE, contentValues, NoteDatabaseColumns.TableNote._ID + "=" + params[0].getNoteID(), null);
+				Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
+				noteAdapter.swapCursor(c);
 
 				noteAdapter.swapCursor(c);
 				noteAdapter.notifyDataSetChanged();

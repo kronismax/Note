@@ -23,8 +23,6 @@ public class DBHelper extends SQLiteOpenHelper {
 			   + TableNote.TITLE      + " TEXT, "
 			   + TableNote.CONTENT    + " TEXT)";
 
-	
-
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
@@ -32,17 +30,17 @@ public class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db){
 		db.execSQL(CREATE_TABLE_NOTE);
-		//onCreate(db);
+		// onCreate(db);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-		 db.execSQL(DROP_TABLE + Tables.TABLE_NOTE);   
-		  onCreate(db);
+		db.execSQL(DROP_TABLE + Tables.TABLE_NOTE);
+		onCreate(db);
 	}
-	
+
 	@Override
-	public void onOpen(SQLiteDatabase db) {
+	public void onOpen(SQLiteDatabase db){
 		super.onOpen(db);
 		onUpgrade(db, 0, DATABASE_VERSION);
 	}

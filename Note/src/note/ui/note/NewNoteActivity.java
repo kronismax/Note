@@ -5,13 +5,14 @@ import note.api.API;
 import note.api.API.NewNoteResponse;
 import note.api.ApiException;
 import note.model.Note;
-import note.model.database.DBHelper;
+import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.model.database.NoteDatabaseColumns.TableNote;
 import note.utils.UIUtils;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -34,8 +35,9 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 	protected Intent				intent;
 	protected Note					note		= new Note();
 	NoteAdapter						noteAdapter;
-	DBHelper						db;
-	public static final String[]	myContent	= { NoteDatabaseColumns.TableNote._ID, 
+	// DBHelper						db;
+	public Cursor c;
+	public static final String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
 													NoteDatabaseColumns.TableNote.TITLE, 
 													NoteDatabaseColumns.TableNote.CONTENT };
 
@@ -52,9 +54,10 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 		intent = getIntent();
 
-		DBHelper db = new DBHelper(this);
+		// DBHelper db = new DBHelper(this);
 
-		noteAdapter = new NoteAdapter(this, (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
+		//noteAdapter = new NoteAdapter(this, (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
+		noteAdapter = new NoteAdapter(this, c = (getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID)));
 
 	}
 
@@ -132,13 +135,16 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 			} else {
 				if (result.getResult() == 0) {
 
-					DBHelper db = new DBHelper(NewNoteActivity.this);
+					// DBHelper db = new DBHelper(NewNoteActivity.this);
 					ContentValues cv = new ContentValues();
 					cv.put(NoteDatabaseColumns.TableNote.TITLE, request.getTitile());
 					cv.put(NoteDatabaseColumns.TableNote.CONTENT, request.getContent());
-					cv.put(NoteDatabaseColumns.TableNote._ID, request.getSessionID());
-					db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, cv);
-					noteAdapter.notifyDataSetChanged();
+					cv.put(NoteDatabaseColumns.TableNote._ID, result.getNoteID());
+					// db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, cv);
+					getContentResolver().insert(MyContentProvider.URI_NOTE, cv);
+					// noteAdapter.notifyDataSetChanged();
+					noteAdapter.swapCursor(c);
+					
 
 					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
 					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);

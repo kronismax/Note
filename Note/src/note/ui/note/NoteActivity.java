@@ -6,11 +6,8 @@ import note.api.API.DeleteNoteResponse;
 import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
-import note.model.Note;
-import note.model.database.DBHelper;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
-import note.model.database.DBHelper.Tables;
 import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import note.utils.UIUtils;
@@ -40,7 +37,7 @@ public class NoteActivity extends Activity {
 	Button		buttonDelete;
 	ListView	lv;
 	API			API			= new API();
-	DBHelper	db;
+	// DBHelper	db;
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
 								NoteDatabaseColumns.TableNote.TITLE, 
 								NoteDatabaseColumns.TableNote.CONTENT };
@@ -52,7 +49,7 @@ public class NoteActivity extends Activity {
 
 		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 		
-		db = new DBHelper(this);
+		//db = new DBHelper(this);
 		noteAdapter = new NoteAdapter(this, getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID));
 
 		lv = (ListView) findViewById(R.id.list);
@@ -193,8 +190,8 @@ public class NoteActivity extends Activity {
 
 	public void updateNoteAdapter(){
 		if (noteAdapter != null) {
-			DBHelper db = new DBHelper(this);
-			Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+			//DBHelper db = new DBHelper(this);
+			Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
 			Log.d("cursor size", "" + c.getCount());
 			noteAdapter.swapCursor(c);
 		}
@@ -229,14 +226,24 @@ public class NoteActivity extends Activity {
 				switch (result.getNoteCreate()) {
 					case 0:
 						if (result.getNoteArray() != null) {
-							ContentValues contentValues = new ContentValues();
-							for (Note item : result.getNoteArray()) {
-								contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.getTitle());
-								contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.getDescription());
-								contentValues.put(NoteDatabaseColumns.TableNote._ID, item.getId());
-								db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+							//ContentValues contentValues = new ContentValues();
+							//for (Note item : result.getNoteArray()) {
+							//contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.getTitle());
+							//contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.getDescription());
+							//contentValues.put(NoteDatabaseColumns.TableNote._ID, item.getId());
+							//db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+							//getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
+							//Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+							ContentValues[] contentValues = new ContentValues[result.getNoteArray().size()];
+							for (int i = 0; i < contentValues.length; i++) {
+								contentValues[i] = new ContentValues();
+								contentValues[i].put(NoteDatabaseColumns.TableNote._ID, result.getNoteArray().get(i).getId());
+								contentValues[i].put(NoteDatabaseColumns.TableNote.TITLE, result.getNoteArray().get(i).getTitle());
+								contentValues[i].put(NoteDatabaseColumns.TableNote.CONTENT, result.getNoteArray().get(i).getDescription());
+
 							}
-							Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+							getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
+							Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
 							noteAdapter.swapCursor(c);
 						}
 						break;
@@ -279,13 +286,13 @@ public class NoteActivity extends Activity {
 	public class DeleteNoteAsyncTask extends AsyncTask<DeleteNoteRequest, Void, DeleteNoteResponse> {
 
 		ApiException	apiexception;
-		long			deleteNoteId;
-		DBHelper		db	= new DBHelper(NoteActivity.this);
+		DeleteNoteRequest			deleteNoteId;
+		//DBHelper		db	= new DBHelper(NoteActivity.this);
 
 		@Override
 		protected DeleteNoteResponse doInBackground(DeleteNoteRequest... params){
 			try {
-				deleteNoteId = params[0].noteId;
+				deleteNoteId = params[0];
 				Log.d("Note id doIn", ":" + deleteNoteId);
 				return API.deleteNote(params[0].sessionId, params[0].noteId);
 			} catch (ApiException e) {
@@ -302,9 +309,10 @@ public class NoteActivity extends Activity {
 			if (result != null) {
 				switch (result.result) {
 					case 0:
-						DBHelper db = new DBHelper(NoteActivity.this);
-						db.getWritableDatabase().delete(Tables.TABLE_NOTE, NoteDatabaseColumns.TableNote._ID + " = ?", new String[] { String.valueOf(deleteNoteId) });
-						db.close();
+						//DBHelper db = new DBHelper(NoteActivity.this);
+						//db.getWritableDatabase().delete(Tables.TABLE_NOTE, NoteDatabaseColumns.TableNote._ID + " = ?", new String[] { String.valueOf(deleteNoteId) });
+						//db.close();
+						getContentResolver().delete(MyContentProvider.URI_NOTE, NoteDatabaseColumns.TableNote._ID + " = " + deleteNoteId.getNoteId(), null);
 						updateNoteAdapter();
 						break;
 					case 2:

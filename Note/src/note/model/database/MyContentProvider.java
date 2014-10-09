@@ -16,11 +16,10 @@ import android.net.Uri;
 
 public class MyContentProvider extends ContentProvider {
 
-	private DBHelper mDBHelper;
-
+	private DBHelper			mDBHelper;
 	// All URIs share these parts
-	public static final String AUTHORITY = "note";
-	public static final String SCHEME = "content://";
+	public static final String	AUTHORITY	= "note";
+	public static final String	SCHEME		= "content://";
 
 	// URIs
 	public static final Uri URI_NOTE = Uri.parse(SCHEME + AUTHORITY + "/"+ Tables.TABLE_NOTE); // FIXME use buildUpon method here
@@ -30,17 +29,17 @@ public class MyContentProvider extends ContentProvider {
 		NONE, QUERY_NOTE,
 	};
 
-	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+	private static final UriMatcher	sURIMatcher	= new UriMatcher(UriMatcher.NO_MATCH);
 
 	static {
 		addURI(Tables.TABLE_NOTE, QueryId.QUERY_NOTE);
 	}
 
-	private static void addURI(String uri, QueryId query) {
+	private static void addURI(String uri, QueryId query){
 		sURIMatcher.addURI(AUTHORITY, uri, query.ordinal());
 	}
 
-	private static QueryId matchQuery(Uri uri) {
+	private static QueryId matchQuery(Uri uri){
 		int id = sURIMatcher.match(uri);
 		return id == -1 ? QueryId.NONE : QueryId.values()[id];
 	}
@@ -48,43 +47,43 @@ public class MyContentProvider extends ContentProvider {
 	// init
 
 	@Override
-	public boolean onCreate() {
+	public boolean onCreate(){
 		mDBHelper = new DBHelper(getContext());
 		return true;
 	}
 
 	// operations
 
-	private SelectionBuilder buildSimpleSelection(Uri uri) {
+	private SelectionBuilder buildSimpleSelection(Uri uri){
 		final SelectionBuilder builder = new SelectionBuilder();
 		// FIXME can be reworked with method in enum
 		switch (matchQuery(uri)) {
-		case QUERY_NOTE:
-			return builder.table(Tables.TABLE_NOTE);
+			case QUERY_NOTE:
+				return builder.table(Tables.TABLE_NOTE);
 
-			// case QUERY_B:
-			// return builder.table(Tables.TABLE_B);
+				// case QUERY_B:
+				// return builder.table(Tables.TABLE_B);
 
-		default:
-			throw new UnsupportedOperationException("Unknown uri: " + uri);
+			default:
+				throw new UnsupportedOperationException("Unknown uri: " + uri);
 
 		}
 	}
 
-	private void notifyURI(Uri uri) {
+	private void notifyURI(Uri uri){
 		getContext().getContentResolver().notifyChange(uri, null);
 	}
 
 	@Override
-	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder){
 		Cursor result;
 		SQLiteDatabase db = mDBHelper.getReadableDatabase();
 
 		switch (matchQuery(uri)) {
-		default: {
-			final SelectionBuilder builder = buildSimpleSelection(uri);
-			result = builder.where(selection, selectionArgs).query(db, projection, sortOrder);
-		}
+			default: {
+				final SelectionBuilder builder = buildSimpleSelection(uri);
+				result = builder.where(selection, selectionArgs).query(db, projection, sortOrder);
+			}
 		}
 
 		result.setNotificationUri(getContext().getContentResolver(), uri);
@@ -92,26 +91,26 @@ public class MyContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public Uri insert(Uri uri, ContentValues values) {
+	public Uri insert(Uri uri, ContentValues values){
 		Uri result;
 		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 		long id = 0;
 		// FIXME can be reworked with method in enum
 		switch (matchQuery(uri)) {
-		case QUERY_NOTE:
-			id = db.insertOrThrow(Tables.TABLE_NOTE, null, values);
-			// FIXME use buildUpon method here
-			result = Uri.parse(URI_NOTE + "/" + id);
-			break;
+			case QUERY_NOTE:
+				id = db.insertOrThrow(Tables.TABLE_NOTE, null, values);
+				// FIXME use buildUpon method here
+				result = Uri.parse(URI_NOTE + "/" + id);
+				break;
 
-		// case QUERY_B:
-		// id = db.insertOrThrow(Tables.TABLE_B, null, values);
-		// // FIXME use buildUpon method here
-		// result = Uri.parse(URI_B + "/" + id);
-		// break;
+			// case QUERY_B:
+			// id = db.insertOrThrow(Tables.TABLE_B, null, values);
+			// // FIXME use buildUpon method here
+			// result = Uri.parse(URI_B + "/" + id);
+			// break;
 
-		default:
-			throw new UnsupportedOperationException("Unknown uri: " + uri);
+			default:
+				throw new UnsupportedOperationException("Unknown uri: " + uri);
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -119,7 +118,7 @@ public class MyContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int delete(Uri uri, String selection, String[] selectionArgs) {
+	public int delete(Uri uri, String selection, String[] selectionArgs){
 		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 		final SelectionBuilder builder = buildSimpleSelection(uri);
 		int rowsDeleted = builder.where(selection, selectionArgs).delete(db);
@@ -131,7 +130,7 @@ public class MyContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs){
 		final SQLiteDatabase db = mDBHelper.getWritableDatabase();
 		final SelectionBuilder builder = buildSimpleSelection(uri);
 		int rowsUpdated = builder.where(selection, selectionArgs).update(db, values);
@@ -143,28 +142,28 @@ public class MyContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public String getType(Uri uri) {
+	public String getType(Uri uri){
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	// bulk insert operation
 
-	private String simpleGetTable(Uri uri) {
+	private String simpleGetTable(Uri uri){
 		// FIXME can be reworked with method in enum
 		switch (matchQuery(uri)) {
-		case QUERY_NOTE:
-			return Tables.TABLE_NOTE;
+			case QUERY_NOTE:
+				return Tables.TABLE_NOTE;
 
-			// case QUERY_B:
-			// return Tables.TABLE_B;
+				// case QUERY_B:
+				// return Tables.TABLE_B;
 
-		default:
-			throw new UnsupportedOperationException("Unknown uri: " + uri);
+			default:
+				throw new UnsupportedOperationException("Unknown uri: " + uri);
 		}
 	}
 
 	@Override
-	public final int bulkInsert(Uri url, ContentValues[] values) {
+	public final int bulkInsert(Uri url, ContentValues[] values){
 		int result = 0;
 		String table = simpleGetTable(url);
 		final SQLiteDatabase db = mDBHelper.getWritableDatabase();
@@ -188,9 +187,7 @@ public class MyContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public ContentProviderResult[] applyBatch(
-			ArrayList<ContentProviderOperation> operations)
-			throws OperationApplicationException {
+	public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException{
 		final SQLiteDatabase db = mDBHelper.getWritableDatabase();
 		db.beginTransaction();
 		try {
