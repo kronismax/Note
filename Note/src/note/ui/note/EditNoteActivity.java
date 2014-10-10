@@ -217,9 +217,7 @@ public class EditNoteActivity extends Activity {
 			} else {
 				switch (result.getGetNote()) {
 					case 0:
-
-						getActionBar().setTitle(result.getTitle());
-
+						getActionBar().setTitle("Ред. заметки " + result.getTitle());
 						editNote.setText(result.getContent());
 						break;
 					case 2:

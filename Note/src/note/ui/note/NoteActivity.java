@@ -111,8 +111,8 @@ public class NoteActivity extends Activity {
 				startActivity(intentChangePassword);
 				return true;
 			case R.id.action_logOut:
-				Intent intentLogOut = new Intent(this, MainActivity.class);
-				startActivity(intentLogOut);
+				API = new API();
+				new MyAsyncTask().execute(new LogOut(((MyApplication) getApplication()).getLocalData().getSessionId()));
 				return true;
 			case R.id.action_add:
 				Intent intentAdd = new Intent(this, NewNoteActivity.class);

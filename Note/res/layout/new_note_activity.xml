@@ -36,6 +36,6 @@
         android:layout_below="@+id/textNote"
         android:layout_gravity="center"
         android:layout_marginTop="30dp"
-        android:text="5 Random Notes" />
+        android:text="@string/RandomNotes" />
 
 </LinearLayout>

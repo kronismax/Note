@@ -84,7 +84,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					request.login = "q";
 					request.password = "q";
 
-					Toast toast = Toast.makeText(getActivity(), "q", Toast.LENGTH_SHORT);
+					Toast toast = Toast.makeText(getActivity(), "      q", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 					
