@@ -19,12 +19,14 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.note.R;
 
-public class EditNoteActivity extends Activity {
+public class EditNoteActivity extends Activity implements View.OnClickListener{
 
 	public static final String[]	myColumns		= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
 
@@ -35,6 +37,7 @@ public class EditNoteActivity extends Activity {
 	protected NoteAdapter			noteAdapter;
 	ContentValues					contentValues	= new ContentValues();
 	Cursor							c;
+	private Button Back;
 
 	public class GetNote {
 
@@ -60,7 +63,8 @@ public class EditNoteActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.edit_note);
 		editNote = (EditText) findViewById(R.id.editNote);
-
+		Back = (Button) findViewById(R.id.ButtonBackEdit);
+		Back.setOnClickListener(this);
 		//DBHelper db = new DBHelper(this);
 		//noteAdapter = new NoteAdapter(this, c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
 		noteAdapter = new NoteAdapter(this, c = (getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID)));
@@ -235,5 +239,14 @@ public class EditNoteActivity extends Activity {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onClick(View v){
+		Intent intent = new Intent(EditNoteActivity.this, NoteActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+		finish();
+		
 	}
 }

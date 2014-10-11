@@ -41,6 +41,8 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 													NoteDatabaseColumns.TableNote.TITLE, 
 													NoteDatabaseColumns.TableNote.CONTENT };
 
+	private Button Back;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -51,7 +53,8 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 		titleNote = (EditText) findViewById(R.id.titleNote);
 		randomNotes = (Button) findViewById(R.id.button1);
 		randomNotes.setOnClickListener(this);
-
+		Back = (Button) findViewById(R.id.ButtonBack);
+		Back.setOnClickListener(this);
 		intent = getIntent();
 
 		// DBHelper db = new DBHelper(this);
@@ -166,11 +169,19 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 	@Override
 	public void onClick(View arg0){
-		for (int i = 1; i < 6; i++) {
-			new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
+		switch (arg0.getId()) {
+			case R.id.button1:
+				for (int i = 1; i < 6; i++) {
+					new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
+				}
+				break;
+			case R.id.ButtonBack:
+				Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				finish();
+				break;
 		}
 
-		
-		
 	}
 }
