@@ -12,7 +12,12 @@ import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import note.utils.UIUtils;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -41,7 +46,9 @@ public class NoteActivity extends Activity {
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
 								NoteDatabaseColumns.TableNote.TITLE, 
 								NoteDatabaseColumns.TableNote.CONTENT };
-
+	AlertDialog.Builder ad;
+    Context 	context;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -68,11 +75,27 @@ public class NoteActivity extends Activity {
 		noteAdapter.setOnDeleteClickListener(new NoteAdapter.OnDeleteItemListner() {
 
 			@Override
-			public void onItemDeleteClick(long id){
-				if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id)) != null) {
-					new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
-				}
-			}
+					public void onItemDeleteClick(final long id) {
+						context = NoteActivity.this;
+						String title = "    Уверен";
+						String button1String = "Да";
+						String button2String = "Отмена";
+
+						ad = new AlertDialog.Builder(context);
+						ad.setTitle(title);
+						ad.setNegativeButton(button1String,new OnClickListener() {
+									public void onClick(DialogInterface dialog,int arg1) {
+										if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id)) != null) {
+											new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+										}
+									}
+								});
+						ad.setPositiveButton(button2String, new OnClickListener() { public void onClick(DialogInterface dialog, int arg1) {
+									}
+								});
+						ad.setCancelable(false);
+						ad.show();
+					}
 		});
 	}
 
@@ -170,7 +193,7 @@ public class NoteActivity extends Activity {
 						Intent intentLogOut = new Intent(NoteActivity.this, MainActivity.class);
 						startActivity(intentLogOut);
 
-						Toast toast = Toast.makeText(NoteActivity.this, "Успех", Toast.LENGTH_LONG);
+						Toast toast = Toast.makeText(NoteActivity.this, "  Успех", Toast.LENGTH_LONG);
 						toast.setGravity(Gravity.BOTTOM, 10, 50);
 						toast.show();
 						break;
