@@ -41,11 +41,10 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 													NoteDatabaseColumns.TableNote.TITLE, 
 													NoteDatabaseColumns.TableNote.CONTENT };
 
-	private Button Back;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.new_note_activity);
 		API = new API();
 
@@ -53,8 +52,6 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 		titleNote = (EditText) findViewById(R.id.titleNote);
 		randomNotes = (Button) findViewById(R.id.button1);
 		randomNotes.setOnClickListener(this);
-		Back = (Button) findViewById(R.id.ButtonBack);
-		Back.setOnClickListener(this);
 		intent = getIntent();
 
 		// DBHelper db = new DBHelper(this);
@@ -83,6 +80,8 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 				} else {
 					Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
 				}
+			case android.R.id.home:
+				onBackPressed();
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -174,12 +173,6 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 				for (int i = 1; i < 6; i++) {
 					new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
 				}
-				break;
-			case R.id.ButtonBack:
-				Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-				finish();
 				break;
 		}
 

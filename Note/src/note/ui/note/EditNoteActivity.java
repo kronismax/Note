@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 import com.example.note.R;
 
-public class EditNoteActivity extends Activity implements View.OnClickListener{
+public class EditNoteActivity extends Activity {
 
 	public static final String[]	myColumns		= { NoteDatabaseColumns.TableNote._ID, NoteDatabaseColumns.TableNote.TITLE, NoteDatabaseColumns.TableNote.CONTENT };
 
@@ -37,7 +37,6 @@ public class EditNoteActivity extends Activity implements View.OnClickListener{
 	protected NoteAdapter			noteAdapter;
 	ContentValues					contentValues	= new ContentValues();
 	Cursor							c;
-	private Button Back;
 
 	public class GetNote {
 
@@ -61,10 +60,10 @@ public class EditNoteActivity extends Activity implements View.OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
 		setContentView(R.layout.edit_note);
 		editNote = (EditText) findViewById(R.id.editNote);
-		Back = (Button) findViewById(R.id.ButtonBackEdit);
-		Back.setOnClickListener(this);
 		//DBHelper db = new DBHelper(this);
 		//noteAdapter = new NoteAdapter(this, c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
 		noteAdapter = new NoteAdapter(this, c = (getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID)));
@@ -91,6 +90,8 @@ public class EditNoteActivity extends Activity implements View.OnClickListener{
 				startActivity(intent);
 				finish();
 				break;
+			case android.R.id.home:
+				onBackPressed();
 			default:
 				break;
 		}
@@ -234,19 +235,9 @@ public class EditNoteActivity extends Activity implements View.OnClickListener{
 						Toast toast2 = Toast.makeText(EditNoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
 						toast2.setGravity(Gravity.BOTTOM, 10, 50);
 						toast2.show();
-
 						break;
 				}
 			}
 		}
-	}
-
-	@Override
-	public void onClick(View v){
-		Intent intent = new Intent(EditNoteActivity.this, NoteActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
-		finish();
-		
 	}
 }

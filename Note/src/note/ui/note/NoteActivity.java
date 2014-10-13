@@ -77,7 +77,7 @@ public class NoteActivity extends Activity {
 			@Override
 					public void onItemDeleteClick(final long id) {
 						context = NoteActivity.this;
-						String title = "    Уверен";
+						String title = "                    Уверен";
 						String button1String = "Да";
 						String button2String = "Отмена";
 
