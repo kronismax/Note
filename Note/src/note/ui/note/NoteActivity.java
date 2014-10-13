@@ -75,27 +75,30 @@ public class NoteActivity extends Activity {
 		noteAdapter.setOnDeleteClickListener(new NoteAdapter.OnDeleteItemListner() {
 
 			@Override
-					public void onItemDeleteClick(final long id) {
-						context = NoteActivity.this;
-						String title = "                    Уверен";
-						String button1String = "Да";
-						String button2String = "Отмена";
+			public void onItemDeleteClick(final long id){
+				context = NoteActivity.this;
+				String title = "                    Уверен";
+				String button1String = "Да";
+				String button2String = "Отмена";
 
-						ad = new AlertDialog.Builder(context);
-						ad.setTitle(title);
-						ad.setNegativeButton(button1String,new OnClickListener() {
-									public void onClick(DialogInterface dialog,int arg1) {
-										if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id)) != null) {
-											new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
-										}
-									}
-								});
-						ad.setPositiveButton(button2String, new OnClickListener() { public void onClick(DialogInterface dialog, int arg1) {
-									}
-								});
-						ad.setCancelable(false);
-						ad.show();
+				ad = new AlertDialog.Builder(context);
+				ad.setTitle(title);
+				ad.setNegativeButton(button1String, new OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int arg1){
+						if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id)) != null) {
+							new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+						}
 					}
+				});
+				ad.setPositiveButton(button2String, new OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int arg1){
+					}
+				});
+				ad.setCancelable(false);
+				ad.show();
+			}
 		});
 	}
 

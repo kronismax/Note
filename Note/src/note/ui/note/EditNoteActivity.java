@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -138,9 +139,11 @@ public class EditNoteActivity extends Activity {
 		@Override
 		protected EditNoteResponse doInBackground(EditNote... params){
 
+			Log.d("Реадктирование", "" + params[0].text);
+			
 			try {
 				contentValues.put(NoteDatabaseColumns.TableNote._ID, params[0].getNoteID());
-				contentValues.put(NoteDatabaseColumns.TableNote.TITLE, params[0].text);
+				contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, params[0].text);
 
 				//db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
 				//c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
