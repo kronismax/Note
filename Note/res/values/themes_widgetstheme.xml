@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="WidgetsTheme" parent="@style/_WidgetsTheme"/>
+
+  <style name="_WidgetsTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+
+    <item name="android:editTextBackground">@drawable/widgetstheme_edit_text_holo_light</item>
+
+    <item name="android:textColorHighlight">#99669900</item>
+    <item name="android:textSelectHandleLeft">@drawable/widgetstheme_text_select_handle_left</item>
+    <item name="android:textSelectHandleRight">@drawable/widgetstheme_text_select_handle_right</item>
+    <item name="android:textSelectHandle">@drawable/widgetstheme_text_select_handle_middle</item>
+
+    <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewWidgetsTheme</item>
+
+    <item name="android:listChoiceIndicatorMultiple">@drawable/widgetstheme_btn_check_holo_light</item>
+
+    <item name="android:listChoiceIndicatorSingle">@drawable/widgetstheme_btn_radio_holo_light</item>
+
+    <item name="android:buttonStyle">@style/ButtonWidgetsTheme</item>
+
+    <item name="android:imageButtonStyle">@style/ImageButtonWidgetsTheme</item>
+
+    <item name="android:dropDownSpinnerStyle">@style/SpinnerWidgetsTheme</item>
+
+    <item name="android:progressBarStyleHorizontal">@style/ProgressBarWidgetsTheme</item>
+
+    <item name="android:seekBarStyle">@style/SeekBarWidgetsTheme</item>
+
+    <item name="android:ratingBarStyle">@style/RatingBarWidgetsTheme</item>
+
+    <item name="android:ratingBarStyleIndicator">@style/RatingBarBigWidgetsTheme</item>
+
+    <item name="android:ratingBarStyleSmall">@style/RatingBarSmallWidgetsTheme</item>
+
+    <item name="android:buttonStyleToggle">@style/ToggleWidgetsTheme</item>
+
+    <item name="android:listChoiceBackgroundIndicator">@drawable/widgetstheme_list_selector_holo_light</item>
+
+    <item name="android:activatedBackgroundIndicator">@drawable/widgetstheme_activated_background_holo_light</item>
+
+    <item name="android:fastScrollThumbDrawable">@drawable/widgetstheme_fastscroll_thumb_holo</item>
+
+  </style>
+
+</resources>
