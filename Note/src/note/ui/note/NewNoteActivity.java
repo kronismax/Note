@@ -1,5 +1,7 @@
 package note.ui.note;
 
+import org.json.JSONException;
+
 import note.MyApplication;
 import note.api.API;
 import note.api.API.NewNoteResponse;
@@ -125,6 +127,9 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 				return new API().newNote(params[0].sessionId, params[0].title, params[0].text);
 			} catch (ApiException apIexception) {
 				exception = apIexception;
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			return null;
 		}
@@ -146,7 +151,6 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 					getContentResolver().insert(MyContentProvider.URI_NOTE, cv);
 					// noteAdapter.notifyDataSetChanged();
 					noteAdapter.swapCursor(c);
-					
 
 					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
 					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
