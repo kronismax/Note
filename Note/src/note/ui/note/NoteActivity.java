@@ -1,27 +1,33 @@
 package note.ui.note;
 
+import java.util.concurrent.TimeUnit;
+
 import note.MyApplication;
 import note.api.API;
 import note.api.API.DeleteNoteResponse;
 import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
+import note.model.database.DBHelper;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import note.utils.UIUtils;
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -35,7 +41,7 @@ import android.widget.Toast;
 
 import com.example.note.R;
 
-public class NoteActivity extends Activity {
+public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cursor> {
 
 	String		LOGIN;
 	NoteAdapter	noteAdapter;
@@ -48,8 +54,8 @@ public class NoteActivity extends Activity {
 								NoteDatabaseColumns.TableNote.CONTENT };
 	AlertDialog.Builder ad;
     Context 	context;
-	
-	@Override
+    
+    @Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.note_activity);
@@ -58,7 +64,9 @@ public class NoteActivity extends Activity {
 		
 		//db = new DBHelper(this);
 		noteAdapter = new NoteAdapter(this, getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID));
-
+		//adapter = new SimpleCursorAdapter(this, R.id.list, null, myColumns, to);
+		getLoaderManager().initLoader(1, null, this);
+		
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -217,9 +225,10 @@ public class NoteActivity extends Activity {
 	public void updateNoteAdapter(){
 		if (noteAdapter != null) {
 			//DBHelper db = new DBHelper(this);
-			Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
-			Log.d("cursor size", "" + c.getCount());
-			noteAdapter.swapCursor(c);
+			//Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
+			//Log.d("cursor size", "" + c.getCount());
+			//noteAdapter.swapCursor(c);
+			getLoaderManager().getLoader(1).forceLoad();
 		}
 	}
 
@@ -270,7 +279,9 @@ public class NoteActivity extends Activity {
 							}
 							getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
 							Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
-							noteAdapter.swapCursor(c);
+							//noteAdapter.swapCursor(c);
+							updateNoteAdapter();
+							getLoaderManager().getLoader(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
 						}
 						break;
 					case 1:
@@ -311,9 +322,10 @@ public class NoteActivity extends Activity {
 
 	public class DeleteNoteAsyncTask extends AsyncTask<DeleteNoteRequest, Void, DeleteNoteResponse> {
 
-		ApiException	apiexception;
-		DeleteNoteRequest			deleteNoteId;
-		//DBHelper		db	= new DBHelper(NoteActivity.this);
+		ApiException		apiexception;
+		DeleteNoteRequest	deleteNoteId;
+
+		// DBHelper db = new DBHelper(NoteActivity.this);
 
 		@Override
 		protected DeleteNoteResponse doInBackground(DeleteNoteRequest... params){
@@ -335,9 +347,11 @@ public class NoteActivity extends Activity {
 			if (result != null) {
 				switch (result.result) {
 					case 0:
-						//DBHelper db = new DBHelper(NoteActivity.this);
-						//db.getWritableDatabase().delete(Tables.TABLE_NOTE, NoteDatabaseColumns.TableNote._ID + " = ?", new String[] { String.valueOf(deleteNoteId) });
-						//db.close();
+						// DBHelper db = new DBHelper(NoteActivity.this);
+						// db.getWritableDatabase().delete(Tables.TABLE_NOTE,
+						// NoteDatabaseColumns.TableNote._ID + " = ?", new
+						// String[] { String.valueOf(deleteNoteId) });
+						// db.close();
 						getContentResolver().delete(MyContentProvider.URI_NOTE, NoteDatabaseColumns.TableNote._ID + " = " + deleteNoteId.getNoteId(), null);
 						updateNoteAdapter();
 						break;
@@ -358,4 +372,39 @@ public class NoteActivity extends Activity {
 		}
 
 	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args){
+		CursorLoader cursorLoader = new CursorLoader(this, MyContentProvider.URI_NOTE, myColumns, null, null, null);
+		Log.d("onCreateLoader", "WORK");
+		return cursorLoader;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor){
+		Log.d("onLoadFinished", "WORK");
+		noteAdapter.swapCursor(cursor);
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> arg0){
+		noteAdapter.swapCursor(null);
+	}
+
+//	static class MyCursorLoader extends CursorLoader {
+//
+//		Cursor	c;
+//
+//		public MyCursorLoader(Context context,Cursor c) {
+//			super(context);
+//			this.c = c;
+//		}
+//
+//		@Override
+//		public Cursor loadInBackground(){
+//			return c;
+//		}
+//
+//	}
+
 }
