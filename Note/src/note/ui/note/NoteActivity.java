@@ -1,22 +1,20 @@
 package note.ui.note;
 
-import java.util.concurrent.TimeUnit;
-
 import note.MyApplication;
 import note.api.API;
 import note.api.API.DeleteNoteResponse;
-import note.api.API.GetNoteResponse;
 import note.api.API.LogOutResponse;
 import note.api.API.NoteListResponse;
 import note.api.ApiException;
-import note.model.database.DBHelper;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import note.utils.UIUtils;
 import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -28,8 +26,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -49,25 +45,28 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 	NoteAdapter	noteAdapter;
 	Button		buttonDelete;
 	ListView	lv;
-	API			API			= new API();
+	static API			API			= new API();
 	// DBHelper	db;
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
 								NoteDatabaseColumns.TableNote.TITLE, 
 								NoteDatabaseColumns.TableNote.CONTENT };
-	AlertDialog.Builder ad;
-    Context 	context;
-    
+	AlertDialog.Builder		ad;
+	Context					context;
+	private final String	KEY_FOR_BUNDLE	= "KEY_FOR_BUNDLE";
+
     @Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.note_activity);
-
-		new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
-		
+		Bundle bundle = new Bundle();
+		bundle.putString(KEY_FOR_BUNDLE, (((MyApplication) getApplication()).getLocalData().getSessionId()));
+		//new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+		getLoaderManager().initLoader(1, bundle, this);
+		getLoaderManager().initLoader(2, bundle, notesListResponseLoaderCallbacks);
 		//db = new DBHelper(this);
 		noteAdapter = new NoteAdapter(this, getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID));
 		//adapter = new SimpleCursorAdapter(this, R.id.list, null, myColumns, to);
-		getLoaderManager().initLoader(1, null, this);
+		//getLoaderManager().initLoader(1, null, this);
 		
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
@@ -96,8 +95,9 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 				ad.setNegativeButton(button1String, new OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int arg1){
-						if (new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id)) != null) {
-							new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
+						if (true) {
+							new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id));
+							//new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 						}
 					}
 				});
@@ -232,72 +232,72 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		}
 	}
 
-	public class NotesListArrayAsyncTask extends AsyncTask<NotesList, Void, NoteListResponse> {
-
-		ApiException	apiexception;
-
-		@Override
-		protected void onPreExecute(){
-			super.onPreExecute();
-		}
-
-		@Override
-		protected NoteListResponse doInBackground(NotesList... params){
-
-			try {
-				return API.getNotesList(params[0].getSessionID());
-			} catch (ApiException e) {
-				apiexception = e;
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(NoteListResponse result){
-			super.onPostExecute(result);
-
-			if (result != null) {
-				switch (result.getNoteCreate()) {
-					case 0:
-						if (result.getNoteArray() != null) {
-							//ContentValues contentValues = new ContentValues();
-							//for (Note item : result.getNoteArray()) {
-							//contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.getTitle());
-							//contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.getDescription());
-							//contentValues.put(NoteDatabaseColumns.TableNote._ID, item.getId());
-							//db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
-							//getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
-							//Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
-							ContentValues[] contentValues = new ContentValues[result.getNoteArray().size()];
-							for (int i = 0; i < contentValues.length; i++) {
-								contentValues[i] = new ContentValues();
-								contentValues[i].put(NoteDatabaseColumns.TableNote._ID, result.getNoteArray().get(i).getId());
-								contentValues[i].put(NoteDatabaseColumns.TableNote.TITLE, result.getNoteArray().get(i).getTitle());
-								contentValues[i].put(NoteDatabaseColumns.TableNote.CONTENT, result.getNoteArray().get(i).getDescription());
-
-							}
-							getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
-							//Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
-							//noteAdapter.swapCursor(c);
-							//updateNoteAdapter();
-						}
-						break;
-					case 1:
-						if (result.getNoteArray() == null) {
-							Toast toast1 = Toast.makeText(NoteActivity.this, "Ну", Toast.LENGTH_LONG);
-							toast1.setGravity(Gravity.BOTTOM, 10, 50);
-							toast1.show();
-						}
-						break;
-				}
-			} else {
-				Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
-				toast1.setGravity(Gravity.BOTTOM, 10, 50);
-				toast1.show();
-			}
-		}
-	}
+//	public class NotesListArrayAsyncTask extends AsyncTask<NotesList, Void, NoteListResponse> {
+//
+//		ApiException	apiexception;
+//
+//		@Override
+//		protected void onPreExecute(){
+//			super.onPreExecute();
+//		}
+//
+//		@Override
+//		protected NoteListResponse doInBackground(NotesList... params){
+//
+//			try {
+//				return API.getNotesList(params[0].getSessionID());
+//			} catch (ApiException e) {
+//				apiexception = e;
+//				e.printStackTrace();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(NoteListResponse result){
+//			super.onPostExecute(result);
+//
+//			if (result != null) {
+//				switch (result.getNoteCreate()) {
+//					case 0:
+//						if (result.getNoteArray() != null) {
+//							//ContentValues contentValues = new ContentValues();
+//							//for (Note item : result.getNoteArray()) {
+//							//contentValues.put(NoteDatabaseColumns.TableNote.TITLE, item.getTitle());
+//							//contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, item.getDescription());
+//							//contentValues.put(NoteDatabaseColumns.TableNote._ID, item.getId());
+//							//db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
+//							//getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
+//							//Cursor c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
+//							ContentValues[] contentValues = new ContentValues[result.getNoteArray().size()];
+//							for (int i = 0; i < contentValues.length; i++) {
+//								contentValues[i] = new ContentValues();
+//								contentValues[i].put(NoteDatabaseColumns.TableNote._ID, result.getNoteArray().get(i).getId());
+//								contentValues[i].put(NoteDatabaseColumns.TableNote.TITLE, result.getNoteArray().get(i).getTitle());
+//								contentValues[i].put(NoteDatabaseColumns.TableNote.CONTENT, result.getNoteArray().get(i).getDescription());
+//
+//							}
+//							getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
+//							//Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
+//							//noteAdapter.swapCursor(c);
+//							//updateNoteAdapter();
+//						}
+//						break;
+//					case 1:
+//						if (result.getNoteArray() == null) {
+//							Toast toast1 = Toast.makeText(NoteActivity.this, "Ну", Toast.LENGTH_LONG);
+//							toast1.setGravity(Gravity.BOTTOM, 10, 50);
+//							toast1.show();
+//						}
+//						break;
+//				}
+//			} else {
+//				Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
+//				toast1.setGravity(Gravity.BOTTOM, 10, 50);
+//				toast1.show();
+//			}
+//		}
+//	}
 
 	public class DeleteNoteRequest {
 
@@ -390,120 +390,64 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		noteAdapter.swapCursor(null);
 	}
 
-	public class NoteListAsyncTaskLoader extends AsyncTaskLoader<GetNoteResponse> {
+	public static class NoteListAsyncTaskLoader extends AsyncTaskLoader<NoteListResponse> {
 
 		  // We hold a reference to the Loader’s data here.
-		  private GetNoteResponse mData;
-		  
-		  private String ID;
-		  
-		  public NoteListAsyncTaskLoader(Context ctx, String ID) {
+		private NoteListResponse	mData;
+		private String				sessionID;
+		
+		public NoteListAsyncTaskLoader(Context ctx,String ID) {
 		    // Loaders may be used across multiple Activitys (assuming they aren't
 		    // bound to the LoaderManager), so NEVER hold a reference to the context
 		    // directly. Doing so will cause you to leak an entire Activity's context.
 		    // The superclass constructor will store a reference to the Application
 		    // Context instead, and can be retrieved with a call to getContext().
-		    super(ctx);
-		    this.ID = ID;
-		  }
+			super(ctx);
+			sessionID = ID;
+		}
 
 		  /****************************************************/
 		  /** (1) A task that performs the asynchronous load **/
 		  /****************************************************/
 
-		  @Override
-		  public GetNoteResponse loadInBackground() {
+		@Override
+		public NoteListResponse loadInBackground(){
 		    // This method is called on a background thread and should generate a
 		    // new set of data to be delivered back to the client.
-			  GetNoteResponse data = API.getNote(ID, mLastLoadCompleteTime);
+			getContext().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
+			try {
+				return API.getNotesList(sessionID);
+			} catch (ApiException apIexception) {
+				apIexception.printStackTrace();
+			}
+			return null;
+		}
+	}
+	
+	public LoaderManager.LoaderCallbacks<NoteListResponse>	notesListResponseLoaderCallbacks	= new LoaderManager.LoaderCallbacks<NoteListResponse>() {
 
-		    return data;
-		  }
+    	@Override
+    	public Loader<NoteListResponse> onCreateLoader(int id, Bundle args) {
+    		return new NoteListAsyncTaskLoader(NoteActivity.this, args.getString(KEY_FOR_BUNDLE));
+    	}
+    	@Override
+    	public void onLoadFinished(Loader<NoteListResponse> loader, NoteListResponse data) {
+    		if (data.getNoteArray() != null) {
+    			ContentValues[] contentValues = new ContentValues[data.getNoteArray().size()];
+				for (int i = 0; i < contentValues.length; i++) {
+					contentValues[i] = new ContentValues();
+					contentValues[i].put(NoteDatabaseColumns.TableNote._ID, data.getNoteArray().get(i).noteID);
+					contentValues[i].put(NoteDatabaseColumns.TableNote.TITLE, data.getNoteArray().get(i).title);
+					contentValues[i].put(NoteDatabaseColumns.TableNote.CONTENT, data.getNoteArray().get(i).shortContent);
 
-		  /********************************************************/
-		  /** (2) Deliver the results to the registered listener **/
-		  /********************************************************/
-
-		  @Override
-		  public void deliverResult(List<SampleItem> data) {
-		    if (isReset()) {
-		      // The Loader has been reset; ignore the result and invalidate the data.
-		      releaseResources(data);
-		      return;
-		    }
-
-		    // Hold a reference to the old data so it doesn't get garbage collected.
-		    // We must protect it until the new data has been delivered.
-		    List<SampleItem> oldData = mData;
-		    mData = data;
-
-		    if (isStarted()) {
-		      // If the Loader is in a started state, deliver the results to the
-		      // client. The superclass method does this for us.
-		      super.deliverResult(data);
-		    }
-
-		    // Invalidate the old data as we don't need it any more.
-		    if (oldData != null && oldData != data) {
-		      releaseResources(oldData);
-		    }
-		  }
-
-		  /*********************************************************/
-		  /** (3) Implement the Loader’s state-dependent behavior **/
-		  /*********************************************************/
-
-		  @Override
-		  protected void onStartLoading() {
-		    if (mData != null) {
-		      // Deliver any previously loaded data immediately.
-		      deliverResult(mData);
-		    }
-
-		    if (takeContentChanged() || mData == null) {
-		      // When the observer detects a change, it should call onContentChanged()
-		      // on the Loader, which will cause the next call to takeContentChanged()
-		      // to return true. If this is ever the case (or if the current data is
-		      // null), we force a new load.
-		      forceLoad();
-		    }
-		  }
-
-		  @Override
-		  protected void onStopLoading() {
-		    // The Loader is in a stopped state, so we should attempt to cancel the 
-		    // current load (if there is one).
-		    cancelLoad();
-		  }
-
-		  @Override
-		  protected void onReset() {
-		    // Ensure the loader has been stopped.
-		    onStopLoading();
-
-		    // At this point we can release the resources associated with 'mData'.
-		    if (mData != null) {
-		      releaseResources(mData);
-		      mData = null;
-		    }
-		  }
-
-		  @Override
-		  public void onCanceled(List<SampleItem> data) {
-		    // Attempt to cancel the current asynchronous load.
-		    super.onCanceled(data);
-
-		    // The load has been canceled, so we should release the resources
-		    // associated with 'data'.
-		    releaseResources(data);
-		  }
-
-		  private void releaseResources(List<SampleItem> data) {
-		    // For a simple List, there is nothing to do. For something like a Cursor, we 
-		    // would close it in this method. All resources associated with the Loader
-		    // should be released here.
-		  }
-
-
-
+				}
+				getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
+    		}
+    		getLoaderManager().destroyLoader(2);
+    	}
+    	@Override
+    	public void onLoaderReset(Loader<NoteListResponse> loader) {
+    	}
+    };
+	
 }

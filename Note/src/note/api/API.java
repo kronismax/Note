@@ -237,7 +237,7 @@ public class API {
 		return new LogOutResponse(userLogOut);
 	}
 
-	public class NewNoteResponse {
+	public static class NewNoteResponse {
 
 		long	ID;
 		int		result;
@@ -288,12 +288,12 @@ public class API {
 
 	ArrayList<NoteResponse>	notes;
 
-	public class NoteListResponse {
+	public static class NoteListResponse {
 
 		int				result;
-		ArrayList<Note>	note;
+		ArrayList<NoteResponse>	note;
 
-		public NoteListResponse(int noteListResponse,ArrayList<Note> note) {
+		public NoteListResponse(int noteListResponse,ArrayList<NoteResponse> note) {
 			this.result = noteListResponse;
 			this.note = note;
 		}
@@ -302,7 +302,7 @@ public class API {
 			return result;
 		}
 
-		public ArrayList<Note> getNoteArray(){
+		public ArrayList<NoteResponse> getNoteArray(){
 			return note;
 		}
 	}
@@ -332,7 +332,7 @@ public class API {
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
 		}
 
-		ArrayList<Note> mNotes = new ArrayList<Note>(Arrays.asList(note));
+		ArrayList<NoteResponse> mNotes = new ArrayList<NoteResponse>();
 		Log.d("GET_NOTE_LIST", mNotes.toString());
 		return new NoteListResponse(noteCreate, mNotes);
 	}
@@ -436,5 +436,7 @@ public class API {
 		}
 		return new DeleteNoteResponse(deleteNoteResponse);
 	}
+	
+	
 
 }
