@@ -62,7 +62,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		bundle.putString(KEY_FOR_BUNDLE, (((MyApplication) getApplication()).getLocalData().getSessionId()));
 		//new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 		getLoaderManager().initLoader(1, bundle, this);
-		getLoaderManager().initLoader(2, bundle, notesListResponseLoaderCallbacks);
+		getLoaderManager().initLoader(2, bundle, notesListResponseLoaderCallbacks).forceLoad();
 		//db = new DBHelper(this);
 		noteAdapter = new NoteAdapter(this, getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID));
 		//adapter = new SimpleCursorAdapter(this, R.id.list, null, myColumns, to);
@@ -390,13 +390,13 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		noteAdapter.swapCursor(null);
 	}
 
-	public static class NoteListAsyncTaskLoader extends AsyncTaskLoader<NoteListResponse> {
+	public static class NoteListAsyncTaskLoader extends AsyncTaskLoader<API.NoteListResponse> {
 
 		  // We hold a reference to the Loader’s data here.
-		private NoteListResponse	mData;
+		private API.NoteListResponse	mData;
 		private String				sessionID;
 		
-		public NoteListAsyncTaskLoader(Context ctx,String ID) {
+		public NoteListAsyncTaskLoader(Context ctx, String ID) {
 		    // Loaders may be used across multiple Activitys (assuming they aren't
 		    // bound to the LoaderManager), so NEVER hold a reference to the context
 		    // directly. Doing so will cause you to leak an entire Activity's context.
@@ -411,11 +411,12 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		  /****************************************************/
 
 		@Override
-		public NoteListResponse loadInBackground(){
+		public API.NoteListResponse loadInBackground(){
 		    // This method is called on a background thread and should generate a
 		    // new set of data to be delivered back to the client.
 			getContext().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
 			try {
+				
 				return API.getNotesList(sessionID);
 			} catch (ApiException apIexception) {
 				apIexception.printStackTrace();
@@ -428,6 +429,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
     	@Override
     	public Loader<NoteListResponse> onCreateLoader(int id, Bundle args) {
+    		Log.d("Loader", "0000");
     		return new NoteListAsyncTaskLoader(NoteActivity.this, args.getString(KEY_FOR_BUNDLE));
     	}
     	@Override

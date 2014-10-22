@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.net.Uri;
+import android.net.Uri.Builder;
 import android.util.Log;
 
 public class API {
@@ -107,6 +108,10 @@ public class API {
 		return result;
 	}
 
+	private static Uri.Builder createUrlBuilder() {
+		return new Uri.Builder().scheme("http").encodedAuthority("notes-androidcoursesdp.rhcloud.com").appendPath("REST");
+	}
+	
 	public static class LoginResponse {
 
 		public int		result;
@@ -293,13 +298,22 @@ public class API {
 		int				result;
 		ArrayList<NoteResponse>	note;
 
-		public NoteListResponse(int noteListResponse,ArrayList<NoteResponse> note) {
-			this.result = noteListResponse;
-			this.note = note;
-		}
+//		public NoteListResponse(int noteListResponse,ArrayList<NoteResponse> note) {
+//			this.result = noteListResponse;
+//			this.note = note;
+//		}
+//
+//		public int getNoteCreate(){
+//			return result;
+//		}
 
-		public int getNoteCreate(){
-			return result;
+		public NoteListResponse(JSONObject obj) throws JSONException {
+			result = obj.getInt("result");
+			note = new ArrayList<NoteResponse>();
+			JSONArray arr = obj.getJSONArray("notes");
+			for (int i = 0; i < arr.length(); ++i) {
+				note.add(new NoteResponse(arr.getJSONObject(i)));
+			}
 		}
 
 		public ArrayList<NoteResponse> getNoteArray(){
@@ -308,33 +322,43 @@ public class API {
 	}
 
 	public NoteListResponse getNotesList(String ID) throws ApiException{
-		int noteCreate;
-		Note[] note;
-
-		Uri.Builder builder = API.builder("getNotesList");
-		builder.appendQueryParameter("sessionID", ID);
-
-		String a = GET(builder.build().toString());
-
+//		int noteCreate;
+//		Note[] note;
+//
+//		Uri.Builder builder = API.builder("getNotesList");
+//		builder.appendQueryParameter("sessionID", ID);
+//
+//		String a = GET(builder.build().toString());
+//
+//		try {
+//			JSONObject json = new JSONObject(a);
+//			noteCreate = json.getInt("result");
+//
+//			JSONArray jsonArray = json.getJSONArray("notes");
+//			note = new Note[jsonArray.length()];
+//			for (int i = 0; i < jsonArray.length(); i++) {
+//				JSONObject item = jsonArray.getJSONObject(i);
+//
+//				Log.d("putNote", item.getString("title"));
+//				note[i] = new Note(item.getString("title"), item.getString("shortContent"), item.getLong("noteID"));
+//			}
+//		} catch (JSONException e) {
+//			throw new ApiException(TypeOfError.ERROR_JSON, e);
+//		}
+//
+//		ArrayList<NoteResponse> mNotes = new ArrayList<NoteResponse>();
+//		Log.d("GET_NOTE_LIST", mNotes.toString());
+//		return new NoteListResponse(noteCreate, mNotes);
+		
+		String rawResponse = GET(createUrlBuilder().appendPath("getNotesList").appendQueryParameter("sessionID", ID).toString());
+		NoteListResponse response = null;
 		try {
-			JSONObject json = new JSONObject(a);
-			noteCreate = json.getInt("result");
-
-			JSONArray jsonArray = json.getJSONArray("notes");
-			note = new Note[jsonArray.length()];
-			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject item = jsonArray.getJSONObject(i);
-
-				Log.d("putNote", item.getString("title"));
-				note[i] = new Note(item.getString("title"), item.getString("shortContent"), item.getLong("noteID"));
-			}
+			response = new NoteListResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			e.printStackTrace();
 		}
+		return response;
 
-		ArrayList<NoteResponse> mNotes = new ArrayList<NoteResponse>();
-		Log.d("GET_NOTE_LIST", mNotes.toString());
-		return new NoteListResponse(noteCreate, mNotes);
 	}
 
 	public class GetNoteResponse {
