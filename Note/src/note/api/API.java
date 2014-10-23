@@ -214,32 +214,48 @@ public class API {
 	}
 
 	public class LogOutResponse {
+//		int	userLogOut;
+//
+//		public LogOutResponse(int userLogOut) {
+//			this.userLogOut = userLogOut;
+//		}
+//
+//		public int getChengPasswordResponse(){
+//			return userLogOut;
+//		}
+		
+		public int	result;
 
-		int	userLogOut;
-
-		public LogOutResponse(int userLogOut) {
-			this.userLogOut = userLogOut;
-		}
-
-		public int getChengPasswordResponse(){
-			return userLogOut;
+		public LogOutResponse(JSONObject obj) throws ApiException {
+			try {
+				result = obj.getInt("result");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public LogOutResponse logOut(String ID) throws ApiException{
-		int userLogOut;
+//		int userLogOut;
+//		Uri.Builder builder = API.builder("logout");
+//		builder.appendQueryParameter("sessionID", ID);
+//		String a = GET(builder.build().toString());
+//		try {
+//			JSONObject json = new JSONObject(a);
+//			userLogOut = json.getInt("result");
+//		} catch (Exception e) {
+//			throw new ApiException(TypeOfError.ERROR_JSON, e);
+//		}
+//		return new LogOutResponse(userLogOut);
 
-		Uri.Builder builder = API.builder("logout");
-		builder.appendQueryParameter("sessionID", ID);
-
-		String a = GET(builder.build().toString());
+		String rawResponse = GET(createUrlBuilder().appendPath("logout").appendQueryParameter("sessionID", ID).toString());
+		LogOutResponse response = null;
 		try {
-			JSONObject json = new JSONObject(a);
-			userLogOut = json.getInt("result");
-		} catch (Exception e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			response = new LogOutResponse(new JSONObject(rawResponse));
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		return new LogOutResponse(userLogOut);
+		return response;
 	}
 
 	public static class NewNoteResponse {

@@ -148,7 +148,10 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 				return true;
 			case R.id.action_logOut:
 				API = new API();
-				new MyAsyncTask().execute(new LogOut(((MyApplication) getApplication()).getLocalData().getSessionId()));
+				final Bundle bundle = new Bundle();
+				bundle.putString(KEY_FOR_BUNDLE, (((MyApplication) getApplication()).getLocalData().getSessionId()));
+				//new MyAsyncTask().execute(new LogOut(((MyApplication) getApplication()).getLocalData().getSessionId()));
+				getLoaderManager().initLoader(3, bundle, logoutResponseLoaderCallbacks).forceLoad();
 				return true;
 			case R.id.action_add:
 				Intent intentAdd = new Intent(this, NewNoteActivity.class);
@@ -175,54 +178,54 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		}
 	}
 
-	public class MyAsyncTask extends AsyncTask<LogOut, Void, LogOutResponse> {
-
-		ApiException	apiexception;
-
-		@Override
-		protected void onPreExecute(){
-			super.onPreExecute();
-		}
-
-		@Override
-		protected LogOutResponse doInBackground(LogOut... params){
-
-			try {
-				return API.logOut(params[0].sessionID);
-			} catch (ApiException e) {
-				apiexception = e;
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(LogOutResponse result){
-			super.onPostExecute(result);
-
-			if (result != null) {
-				switch (result.getChengPasswordResponse()) {
-					case 0:
-						Intent intentLogOut = new Intent(NoteActivity.this, MainActivity.class);
-						startActivity(intentLogOut);
-
-						Toast toast = Toast.makeText(NoteActivity.this, "  Успех", Toast.LENGTH_LONG);
-						toast.setGravity(Gravity.BOTTOM, 10, 50);
-						toast.show();
-						break;
-					case 1:
-						Toast toast1 = Toast.makeText(NoteActivity.this, "Не вышло", Toast.LENGTH_LONG);
-						toast1.setGravity(Gravity.BOTTOM, 10, 50);
-						toast1.show();
-						break;
-				}
-			} else {
-				Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
-				toast1.setGravity(Gravity.BOTTOM, 10, 50);
-				toast1.show();
-			}
-		}
-	}
+//	public class MyAsyncTask extends AsyncTask<LogOut, Void, LogOutResponse> {
+//
+//		ApiException	apiexception;
+//
+//		@Override
+//		protected void onPreExecute(){
+//			super.onPreExecute();
+//		}
+//
+//		@Override
+//		protected LogOutResponse doInBackground(LogOut... params){
+//
+//			try {
+//				return API.logOut(params[0].sessionID);
+//			} catch (ApiException e) {
+//				apiexception = e;
+//				e.printStackTrace();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(LogOutResponse result){
+//			super.onPostExecute(result);
+//
+//			if (result != null) {
+//				switch (result.getChengPasswordResponse()) {
+//					case 0:
+//						Intent intentLogOut = new Intent(NoteActivity.this, MainActivity.class);
+//						startActivity(intentLogOut);
+//
+//						Toast toast = Toast.makeText(NoteActivity.this, "  Успех", Toast.LENGTH_LONG);
+//						toast.setGravity(Gravity.BOTTOM, 10, 50);
+//						toast.show();
+//						break;
+//					case 1:
+//						Toast toast1 = Toast.makeText(NoteActivity.this, "Не вышло", Toast.LENGTH_LONG);
+//						toast1.setGravity(Gravity.BOTTOM, 10, 50);
+//						toast1.show();
+//						break;
+//				}
+//			} else {
+//				Toast toast1 = Toast.makeText(NoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
+//				toast1.setGravity(Gravity.BOTTOM, 10, 50);
+//				toast1.show();
+//			}
+//		}
+//	}
 
 	public void updateNoteAdapter(){
 		if (noteAdapter != null) {
@@ -451,5 +454,46 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
     	public void onLoaderReset(Loader<NoteListResponse> loader) {
     	}
     };
+	
+    public LoaderManager.LoaderCallbacks<LogOutResponse> logoutResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<LogOutResponse>() {
+
+        @Override
+        public Loader<LogOutResponse> onCreateLoader(int id, Bundle args) {
+            return new LogOutLoader(NoteActivity.this, args.getString(KEY_FOR_BUNDLE));
+        }
+
+        @Override
+        public void onLoadFinished(Loader<LogOutResponse> loader, LogOutResponse data) {
+            Intent intentLogOut = new Intent(NoteActivity.this, MainActivity.class);
+            intentLogOut.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intentLogOut);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<LogOutResponse> loader) {
+
+        }
+    };
+
+	public static class LogOutLoader extends AsyncTaskLoader<LogOutResponse> {
+		String	sessionID;
+
+		public LogOutLoader(Context context,String sessionID) {
+			super(context);
+			this.sessionID = sessionID;
+		}
+
+		@Override
+		public LogOutResponse loadInBackground(){
+			try {
+				return API.logOut(this.sessionID);
+			} catch (ApiException apIexception) {
+				apIexception.printStackTrace();
+			}
+			return null;
+		}
+	}
+
+	
 	
 }
