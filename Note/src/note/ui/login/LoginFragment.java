@@ -4,6 +4,7 @@ import note.MyApplication;
 import note.api.API;
 import note.api.API.LoginResponse;
 import note.api.ApiException;
+import note.model.database.MyContentProvider;
 import note.ui.note.NoteActivity;
 import note.utils.UIUtils;
 import android.app.Fragment;
@@ -74,7 +75,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					LoginRequest request = new LoginRequest();
 					request.login = LOGIN;
 					request.password = PASS;
-
 					Login.setEnabled(false);
 					mt = new MyAsyncTask();
 					mt.execute(request);
@@ -83,11 +83,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					LoginRequest request = new LoginRequest();
 					request.login = "q";
 					request.password = "q";
-
+					LogText.setText("q");
 					Toast toast = Toast.makeText(getActivity(), "      q", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
-					
 					Login.setEnabled(false);
 					mt = new MyAsyncTask();
 					mt.execute(request);
@@ -122,10 +121,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	public static class LoginRequest {
-
 		String	login;
 		String	password;
-
 	}
 
 	public class MyAsyncTask extends AsyncTask<LoginRequest, Void, LoginResponse> {
@@ -149,6 +146,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				UIUtils.showToastByException(getActivity(), exception);
 			} else {
 				if (result.getResult() == 0) {
+					SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
+					String stringPreference = preferences.getString("login", "");
+					if (!TextUtils.isEmpty(stringPreference)&& !(stringPreference.equals(LogText.getText().toString()))) {
+						getActivity().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
+					}
 					((MyApplication) getActivity().getApplication()).getLocalData().setSessionId(result.sessionId);
 					saveLastLogin();
 					Intent intent = new Intent(getActivity(), NoteActivity.class);

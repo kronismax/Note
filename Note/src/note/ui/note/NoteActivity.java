@@ -61,15 +61,14 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		Bundle bundle = new Bundle();
 		bundle.putString(KEY_FOR_BUNDLE, (((MyApplication) getApplication()).getLocalData().getSessionId()));
 		//new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
-		getLoaderManager().initLoader(1, bundle, this);
-		getLoaderManager().initLoader(2, bundle, notesListResponseLoaderCallbacks).forceLoad();
 		//db = new DBHelper(this);
-		noteAdapter = new NoteAdapter(this, getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID));
 		//adapter = new SimpleCursorAdapter(this, R.id.list, null, myColumns, to);
 		//getLoaderManager().initLoader(1, null, this);
-		
+		noteAdapter = new NoteAdapter(this, null);
 		lv = (ListView) findViewById(R.id.list);
 		lv.setAdapter(noteAdapter);
+		getLoaderManager().initLoader(1, null, this);
+		getLoaderManager().initLoader(2, bundle, notesListResponseLoaderCallbacks).forceLoad();
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
@@ -378,13 +377,11 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args){
 		CursorLoader cursorLoader = new CursorLoader(this, MyContentProvider.URI_NOTE, myColumns, null, null, null);
-		Log.d("onCreateLoader", "WORK");
 		return cursorLoader;
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor){
-		Log.d("onLoadFinished", "WORK");
 		noteAdapter.swapCursor(cursor);
 	}
 
@@ -417,9 +414,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		public API.NoteListResponse loadInBackground(){
 		    // This method is called on a background thread and should generate a
 		    // new set of data to be delivered back to the client.
-			getContext().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
 			try {
-				
 				return API.getNotesList(sessionID);
 			} catch (ApiException apIexception) {
 				apIexception.printStackTrace();
@@ -432,7 +427,6 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
     	@Override
     	public Loader<NoteListResponse> onCreateLoader(int id, Bundle args) {
-    		Log.d("Loader", "0000");
     		return new NoteListAsyncTaskLoader(NoteActivity.this, args.getString(KEY_FOR_BUNDLE));
     	}
     	@Override
@@ -446,6 +440,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 					contentValues[i].put(NoteDatabaseColumns.TableNote.CONTENT, data.getNoteArray().get(i).shortContent);
 
 				}
+				getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
 				getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
     		}
     		getLoaderManager().destroyLoader(2);
@@ -494,6 +489,44 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		}
 	}
 
+	public LoaderManager.LoaderCallbacks<DeleteNoteResponse> DeleteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<DeleteNoteResponse>() {
+
+        @Override
+        public Loader<DeleteNoteResponse> onCreateLoader(int id, Bundle args) {
+            return new LogOutLoader(NoteActivity.this, args.getString(KEY_FOR_BUNDLE));
+        }
+
+        @Override
+        public void onLoadFinished(Loader<DeleteNoteResponse> loader, DeleteNoteResponse data) {
+            Intent intentLogOut = new Intent(NoteActivity.this, MainActivity.class);
+            intentLogOut.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intentLogOut);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<DeleteNoteResponse> loader) {
+
+        }
+    };
+
+	public static class LogOutLoader extends AsyncTaskLoader<LogOutResponse> {
+		String	sessionID;
+
+		public LogOutLoader(Context context,String sessionID) {
+			super(context);
+			this.sessionID = sessionID;
+		}
+
+		@Override
+		public LogOutResponse loadInBackground(){
+			try {
+				return API.logOut(this.sessionID);
+			} catch (ApiException apIexception) {
+				apIexception.printStackTrace();
+			}
+			return null;
+		}
+	}
 	
 	
 }
