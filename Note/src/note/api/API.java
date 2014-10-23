@@ -25,61 +25,10 @@ import android.net.Uri.Builder;
 import android.util.Log;
 
 public class API {
-
-	public boolean setUser(String login, String password){
-
-		boolean userCreate = false;
-		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
-		if (mUsers.isEmpty()) {
-			DataBaseUsers.getInstance().setUsers(new RemoteUser(login, password));
-			userCreate = true;
-		} else {
-			for (int i = 0; i < mUsers.size(); i++) {
-				if (!mUsers.get(i).login.equals(login)) {
-					DataBaseUsers.getInstance().setUsers(new RemoteUser(login, password));
-					userCreate = true;
-				}
-			}
-		}
-		return userCreate;
-	}
-
-	public boolean checkUser(String login, String password){
-		boolean userExists = false;
-		ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
-		for (int i = 0; i < mUsers.size(); i++) {
-			if (mUsers.get(i).login.equals(login) && mUsers.get(i).password.equals(password)) {
-				userExists = true;
-			}
-		}
-		return userExists;
-	}
-
-	// public boolean chengPassword(String login, String password, String
-	// oldPassword) {
-	// boolean chengPassword = false;
-	// ArrayList<RemoteUser> mUsers = DataBaseUsers.getInstance().getUsers();
-	// for (int i = 0; i < mUsers.size(); i++) {
-	// if (mUsers.get(i).login.equals(login) &&
-	// mUsers.get(i).password.equals(oldPassword)) {
-	// DataBaseUsers.getInstance().setUsersChengPassword(i, new
-	// RemoteUser(login, password));
-	// chengPassword = true;
-	// }
-	// }
-	// return chengPassword;
-	// }
-
-	public void putNote(String LOGIN, String NOTE, String NOTE_TITLE_NOTE){
-		DataBaseUsers.getInstance().setNote(LOGIN, NOTE, NOTE_TITLE_NOTE);
-	}
-
+	
 	public static Uri.Builder builder(String oper){
-
 		Uri.Builder builder = new Uri.Builder();
-
 		builder.scheme("http").encodedAuthority("notes-androidcoursesdp.rhcloud.com").appendPath("REST").appendPath(oper);
-
 		return builder;
 	}
 
@@ -214,18 +163,7 @@ public class API {
 	}
 
 	public class LogOutResponse {
-//		int	userLogOut;
-//
-//		public LogOutResponse(int userLogOut) {
-//			this.userLogOut = userLogOut;
-//		}
-//
-//		public int getChengPasswordResponse(){
-//			return userLogOut;
-//		}
-		
 		public int	result;
-
 		public LogOutResponse(JSONObject obj) throws ApiException {
 			try {
 				result = obj.getInt("result");
@@ -236,18 +174,6 @@ public class API {
 	}
 
 	public LogOutResponse logOut(String ID) throws ApiException{
-//		int userLogOut;
-//		Uri.Builder builder = API.builder("logout");
-//		builder.appendQueryParameter("sessionID", ID);
-//		String a = GET(builder.build().toString());
-//		try {
-//			JSONObject json = new JSONObject(a);
-//			userLogOut = json.getInt("result");
-//		} catch (Exception e) {
-//			throw new ApiException(TypeOfError.ERROR_JSON, e);
-//		}
-//		return new LogOutResponse(userLogOut);
-
 		String rawResponse = GET(createUrlBuilder().appendPath("logout").appendQueryParameter("sessionID", ID).toString());
 		LogOutResponse response = null;
 		try {
@@ -314,15 +240,6 @@ public class API {
 		int				result;
 		ArrayList<NoteResponse>	note;
 
-//		public NoteListResponse(int noteListResponse,ArrayList<NoteResponse> note) {
-//			this.result = noteListResponse;
-//			this.note = note;
-//		}
-//
-//		public int getNoteCreate(){
-//			return result;
-//		}
-
 		public NoteListResponse(JSONObject obj) throws JSONException {
 			result = obj.getInt("result");
 			note = new ArrayList<NoteResponse>();
@@ -338,34 +255,6 @@ public class API {
 	}
 
 	public NoteListResponse getNotesList(String ID) throws ApiException{
-//		int noteCreate;
-//		Note[] note;
-//
-//		Uri.Builder builder = API.builder("getNotesList");
-//		builder.appendQueryParameter("sessionID", ID);
-//
-//		String a = GET(builder.build().toString());
-//
-//		try {
-//			JSONObject json = new JSONObject(a);
-//			noteCreate = json.getInt("result");
-//
-//			JSONArray jsonArray = json.getJSONArray("notes");
-//			note = new Note[jsonArray.length()];
-//			for (int i = 0; i < jsonArray.length(); i++) {
-//				JSONObject item = jsonArray.getJSONObject(i);
-//
-//				Log.d("putNote", item.getString("title"));
-//				note[i] = new Note(item.getString("title"), item.getString("shortContent"), item.getLong("noteID"));
-//			}
-//		} catch (JSONException e) {
-//			throw new ApiException(TypeOfError.ERROR_JSON, e);
-//		}
-//
-//		ArrayList<NoteResponse> mNotes = new ArrayList<NoteResponse>();
-//		Log.d("GET_NOTE_LIST", mNotes.toString());
-//		return new NoteListResponse(noteCreate, mNotes);
-		
 		String rawResponse = GET(createUrlBuilder().appendPath("getNotesList").appendQueryParameter("sessionID", ID).toString());
 		NoteListResponse response = null;
 		try {
