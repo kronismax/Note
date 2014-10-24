@@ -189,10 +189,10 @@ public class API {
 		long	ID;
 		int		result;
 
-		public NewNoteResponse(int result,long id) {
-			this.result = result;
-			ID = id;
-		}
+		public NewNoteResponse(JSONObject obj) throws JSONException {
+			ID = obj.getLong("noteID");
+            result = obj.getInt("result");
+        }
 
 		public long getNoteID(){
 			return ID;
@@ -203,22 +203,20 @@ public class API {
 		}
 	}
 
-	public NewNoteResponse newNote(String ID, String title, String text) throws ApiException, JSONException{
-		int newNote;
-		long id;
-		Uri.Builder builder = API.builder("createNote");
-		builder.appendQueryParameter("sessionID", ID).appendQueryParameter("title", title).appendQueryParameter("content", text);
-		Log.d("NewNote", builder.build().toString());
-		try {
-			JSONObject json = new JSONObject(GET(builder.build().toString()));
-			newNote = json.getInt("result");
-			id = json.getLong("noteID");
-		} catch (Exception e) {
-			Log.d("NewNote", e.toString());
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
-		}
-		return new NewNoteResponse(newNote, id);
-	}
+	public NewNoteResponse newNote(String ID, String title, String content) throws ApiException, JSONException{
+        String rawResponse = GET(createUrlBuilder().appendPath("createNote")
+                .appendQueryParameter("sessionID", ID)
+                .appendQueryParameter("title", title)
+                .appendQueryParameter("content", content)
+                .toString());
+        NewNoteResponse response = null;
+        try {
+            response = new NewNoteResponse(new JSONObject(rawResponse));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
 
 	public static class NoteResponse {
 

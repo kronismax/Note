@@ -1,7 +1,5 @@
 package note.ui.note;
 
-import org.json.JSONException;
-
 import note.MyApplication;
 import note.api.API;
 import note.api.API.NewNoteResponse;
@@ -10,13 +8,24 @@ import note.model.Note;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.model.database.NoteDatabaseColumns.TableNote;
+import note.ui.note.NewNoteActivity.NoteCreate;
 import note.utils.UIUtils;
+
+import org.json.JSONException;
+
 import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,7 +39,7 @@ import com.example.note.R;
 
 public class NewNoteActivity extends Activity implements View.OnClickListener {
 
-	protected API					API;
+	protected static API			API;
 	protected EditText				textNote;
 	protected EditText				titleNote;
 	protected Button				randomNotes;
@@ -42,7 +51,9 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 	public static final String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
 													NoteDatabaseColumns.TableNote.TITLE, 
 													NoteDatabaseColumns.TableNote.CONTENT };
-
+	public String KEY_FOR_NOTE_CREATE = "KEY_FOR_NOTE_CREATE";
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -72,12 +83,14 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 	public boolean onOptionsItemSelected(MenuItem item){
 		final String NOTE = textNote.getText().toString();
-		final String NOTE_TITLE_NOTE = titleNote.getText().toString();
+		final String TITLE = titleNote.getText().toString();
 
 		switch (item.getItemId()) {
 			case R.id.action_save_new_note:
-				if (!NOTE_TITLE_NOTE.equals("")) {
-					new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), NOTE_TITLE_NOTE, NOTE));
+				if (!TITLE.equals("")) {
+					Bundle bundle = new Bundle();
+					bundle.putParcelable(KEY_FOR_NOTE_CREATE, new NoteCreate(((MyApplication) getApplication()).getLocalData().getSessionId(), TITLE, NOTE));
+	                getLoaderManager().initLoader(2, bundle, createNoteResponseLoaderCallbacks).forceLoad();
 					return true;
 				} else {
 					Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show();
@@ -115,70 +128,113 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 	}
 
-	public class MyAsyncTask extends AsyncTask<NewNoteRequest, Void, NewNoteResponse> {
-
-		ApiException	exception;
-		NewNoteRequest	request;
-
-		@Override
-		protected NewNoteResponse doInBackground(NewNoteRequest... params){
-			try {
-				request = params[0];
-				return new API().newNote(params[0].sessionId, params[0].title, params[0].text);
-			} catch (ApiException apIexception) {
-				exception = apIexception;
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		protected void onPostExecute(NewNoteResponse result){
-			super.onPostExecute(result);
-
-			if (result == null) {
-				UIUtils.showToastByException(NewNoteActivity.this, exception);
-			} else {
-				if (result.getResult() == 0) {
-
-					// DBHelper db = new DBHelper(NewNoteActivity.this);
-					ContentValues cv = new ContentValues();
-					cv.put(NoteDatabaseColumns.TableNote.TITLE, request.getTitile());
-					cv.put(NoteDatabaseColumns.TableNote.CONTENT, request.getContent());
-					cv.put(NoteDatabaseColumns.TableNote._ID, result.getNoteID());
-					// db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, cv);
-					getContentResolver().insert(MyContentProvider.URI_NOTE, cv);
-					// noteAdapter.notifyDataSetChanged();
-					noteAdapter.swapCursor(c);
-
-					Toast.makeText(NewNoteActivity.this, "Красава", Toast.LENGTH_SHORT).show();
-					Intent intent = new Intent(NewNoteActivity.this, NoteActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-
-				} else if (result.getResult() == 1) {
-					Toast toast = Toast.makeText(NewNoteActivity.this, "Неправильная сессия", Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.BOTTOM, 10, 50);
-					toast.show();
-				} else {
-					Toast toast = Toast.makeText(NewNoteActivity.this, "Попробуйте позже", Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.BOTTOM, 10, 50);
-					toast.show();
-				}
-			}
-		}
-	}
+	
 
 	@Override
 	public void onClick(View arg0){
 		switch (arg0.getId()) {
 			case R.id.button1:
+				Bundle bundle = new Bundle();
 				for (int i = 1; i < 6; i++) {
-					new MyAsyncTask().execute(new NewNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
+					bundle.putParcelable(KEY_FOR_NOTE_CREATE, new NoteCreate(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
+					getLoaderManager().initLoader(i+3, bundle, createNoteResponseLoaderCallbacks).forceLoad();
 				}
 				break;
 		}
 
 	}
+	
+	public LoaderManager.LoaderCallbacks<NewNoteResponse> createNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<NewNoteResponse>() {
+        NoteCreate request;
+
+        @Override
+        public Loader<NewNoteResponse> onCreateLoader(int id, Bundle args) {
+            request = args.getParcelable(KEY_FOR_NOTE_CREATE);
+            return new NoteCreateLoader(NewNoteActivity.this, (NoteCreate) args.getParcelable(KEY_FOR_NOTE_CREATE));
+        }
+
+        @Override
+        public void onLoadFinished(Loader<NewNoteResponse> loader, NewNoteResponse data) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(NoteDatabaseColumns.TableNote.TITLE, request.title);
+            contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, request.content);
+            contentValues.put(NoteDatabaseColumns.TableNote._ID, data.getNoteID());
+            getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
+
+            Intent intentLogOut = new Intent(NewNoteActivity.this, NoteActivity.class);
+            intentLogOut.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intentLogOut);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<NewNoteResponse> loader) {
+        }
+    };
+
+    public static class NoteCreateLoader extends AsyncTaskLoader<NewNoteResponse> {
+
+        public NoteCreate noteCreate;
+
+        public NoteCreateLoader(Context context, NoteCreate noteCreate) {
+            super(context);
+            this.noteCreate = noteCreate;
+        }
+
+
+		@Override
+		public NewNoteResponse loadInBackground() {
+			try {
+				return API.newNote(noteCreate.sessionID, noteCreate.title, noteCreate.content);
+			} catch (ApiException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+	
+    
+    public class NoteCreate implements Parcelable {
+        public final Creator<NoteCreate> CREATOR = new Parcelable.Creator<NoteCreate>() {
+
+            @Override
+            public NoteCreate createFromParcel(Parcel source) {
+                return new NoteCreate(source);
+            }
+
+            @Override
+            public NoteCreate[] newArray(int size) {
+                return new NoteCreate[size];
+            }
+        };
+        private String sessionID;
+        private String title;
+        private String content;
+
+        public NoteCreate(Parcel source) {
+            sessionID = source.readString();
+            title = source.readString();
+            content = source.readString();
+        }
+
+        public NoteCreate(String _sessionID, String _title, String _content) {
+            sessionID = _sessionID;
+            title = _title;
+            content = _content;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(sessionID);
+            dest.writeString(title);
+            dest.writeString(content);
+        }
+    }
+	
 }
