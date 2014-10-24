@@ -8,8 +8,8 @@ import note.api.API.NoteListResponse;
 import note.api.ApiException;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
-import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
+import note.ui.note.NoteActivity.DeleteRequest;
 import note.utils.UIUtils;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -25,6 +25,9 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -84,6 +87,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
 			@Override
 			public void onItemDeleteClick(final long id){
+				lastDeleteId = id;
 				context = NoteActivity.this;
 				String title = "                    Уверен";
 				String button1String = "Да";
@@ -95,7 +99,11 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
 					public void onClick(DialogInterface dialog, int arg1){
 						if (true) {
-							new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id));
+							Bundle deleteBundle = new Bundle();
+			                DeleteRequest deleteRequest = new DeleteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), lastDeleteId);
+			                deleteBundle.putParcelable(DELETE_KEY_FOR_BUNDLE, new DeleteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), lastDeleteId));
+			                getLoaderManager().restartLoader(3, deleteBundle, deleteNoteResponseLoaderCallbacks).forceLoad();
+							//new DeleteNoteAsyncTask().execute(new DeleteNoteRequest(((MyApplication) getApplication()).getLocalData().getSessionId(), id));
 							//new NotesListArrayAsyncTask().execute(new NotesList(((MyApplication) getApplication()).getLocalData().getSessionId()));
 						}
 					}
@@ -488,45 +496,91 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 			return null;
 		}
 	}
+	public long lastDeleteId;
+	private String DELETE_KEY_FOR_BUNDLE = "DELETE_KEY_FOR_BUNDLE";
+    public LoaderManager.LoaderCallbacks<DeleteNoteResponse> deleteNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<DeleteNoteResponse>() {
 
-	public LoaderManager.LoaderCallbacks<DeleteNoteResponse> DeleteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<DeleteNoteResponse>() {
+        public DeleteRequest request;
 
         @Override
         public Loader<DeleteNoteResponse> onCreateLoader(int id, Bundle args) {
-            return new LogOutLoader(NoteActivity.this, args.getString(KEY_FOR_BUNDLE));
+            request = (DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE);
+            Log.d("DelrequesteteRequest", "request: " + request);
+            return new DeleteLoader(NoteActivity.this, (DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE));
         }
 
         @Override
         public void onLoadFinished(Loader<DeleteNoteResponse> loader, DeleteNoteResponse data) {
-            Intent intentLogOut = new Intent(NoteActivity.this, MainActivity.class);
-            intentLogOut.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intentLogOut);
+            getContentResolver().delete(MyContentProvider.URI_NOTE, NoteDatabaseColumns.TableNote._ID + " = " + request.noteId, null);
         }
 
         @Override
         public void onLoaderReset(Loader<DeleteNoteResponse> loader) {
-
         }
     };
+    
+    public static class DeleteLoader extends AsyncTaskLoader<DeleteNoteResponse> {
+        public DeleteRequest deleteRequest;
 
-	public static class LogOutLoader extends AsyncTaskLoader<LogOutResponse> {
-		String	sessionID;
+        public DeleteLoader(Context context, DeleteRequest deleteRequest) {
+            super(context);
+            this.deleteRequest = deleteRequest;
+        }
 
-		public LogOutLoader(Context context,String sessionID) {
-			super(context);
-			this.sessionID = sessionID;
-		}
+        @Override
+        public DeleteNoteResponse loadInBackground() {
+            try {
+                Log.d("loadInBackground", "deleteRequest" + deleteRequest);
+                return API.deleteNote(deleteRequest.sessionID, deleteRequest.noteId);
 
-		@Override
-		public LogOutResponse loadInBackground(){
-			try {
-				return API.logOut(this.sessionID);
-			} catch (ApiException apIexception) {
-				apIexception.printStackTrace();
-			}
-			return null;
-		}
-	}
+            } catch (ApiException apIexception) {
+                apIexception.printStackTrace();
+            }
+            return null;
+        }
+    }
 	
-	
+    public class DeleteRequest implements Parcelable {
+        public final Creator<DeleteRequest> CREATOR = new Parcelable.Creator<DeleteRequest>() {
+
+            @Override
+            public DeleteRequest createFromParcel(Parcel source) {
+                return new DeleteRequest(source);
+            }
+
+            @Override
+            public DeleteRequest[] newArray(int size) {
+                return new DeleteRequest[size];
+            }
+        };
+        private String sessionID;
+        private long noteId;
+
+        public DeleteRequest(Parcel source) {
+            sessionID = source.readString();
+            noteId = source.readLong();
+        }
+
+
+        public DeleteRequest(String sessionID, long lastDeleteId) {
+            this.sessionID = sessionID;
+            noteId = lastDeleteId;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(sessionID);
+            dest.writeLong(noteId);
+
+        }
+    }
+    
+    
+    
+    
 }

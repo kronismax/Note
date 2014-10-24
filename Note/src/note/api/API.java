@@ -345,25 +345,24 @@ public class API {
 
 		public int	result;
 
-		public DeleteNoteResponse(int deleteNoteResponse) {
-			this.result = deleteNoteResponse;
-		}
+		public DeleteNoteResponse(JSONObject obj) throws JSONException {
+            result = obj.getInt("result");
+        }
 
 	}
 
 	public DeleteNoteResponse deleteNote(String sessionId, long noteId) throws ApiException{
-		int deleteNoteResponse;
-		Uri.Builder builder = API.builder("deleteNote");
-		builder.appendQueryParameter("sessionID", sessionId).appendQueryParameter("noteID", Long.toString(noteId));
-
+		String rawResponse = GET(createUrlBuilder().appendPath("deleteNote")
+				.appendQueryParameter("sessionID", sessionId)
+				.appendQueryParameter("noteID", String.valueOf(noteId))
+				.toString());
+		DeleteNoteResponse response = null;
 		try {
-			JSONObject json = new JSONObject(GET(builder.build().toString()));
-			deleteNoteResponse = json.getInt("result");
-
-		} catch (Exception e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			response = new DeleteNoteResponse(new JSONObject(rawResponse));
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		return new DeleteNoteResponse(deleteNoteResponse);
+		return response;
 	}
 	
 	
