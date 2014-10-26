@@ -63,24 +63,28 @@ public class API {
 	
 	public static class LoginResponse {
 
+		public String	sessionID	= "";
 		public int		result;
-		public String	sessionId;
 
-		public int getResult(){
+		public LoginResponse(JSONObject obj) throws ApiException {
+			try {
+				sessionID = obj.getString("sessionID");
+				result = obj.getInt("result");
+
+			} catch (JSONException e) {
+				throw new ApiException(ApiException.TypeOfError.ERROR_JSON, e);
+			}
+
+		}
+
+		public int getUserCreate(){
 			return result;
 		}
 
 		public String getSessionID(){
-			return sessionId;
+			return sessionID;
 		}
 
-		public LoginResponse() {
-		}
-
-		public LoginResponse(JSONObject json) throws JSONException {
-			result = json.getInt("result");
-			sessionId = json.getString("sessionID");
-		}
 	}
 
 	public LoginResponse login(String login, String password) throws ApiException{

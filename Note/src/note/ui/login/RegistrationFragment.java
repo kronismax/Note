@@ -20,22 +20,22 @@ import com.example.note.R;
 
 public class RegistrationFragment extends Fragment implements View.OnClickListener {
 
-	private EditText LogText;
-	private EditText PassText;
-	private EditText RepeatPassText;
-	private Button Registration;
+	private EditText	LogText;
+	private EditText	PassText;
+	private EditText	RepeatPassText;
+	private Button		Registration;
 
-	API api = new API();
+	API					api	= new API();
 
-	MyAsyncTask mt;
+	MyAsyncTask			mt;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance){
 		return inflater.inflate(R.layout.register_frag, container, false);
 	}
 
 	@Override
-	public void onViewCreated(View view, Bundle saveInstanceState) {
+	public void onViewCreated(View view, Bundle saveInstanceState){
 		super.onViewCreated(view, saveInstanceState);
 
 		LogText = (EditText) view.findViewById(R.id.logText);
@@ -46,7 +46,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 
 	}
 
-	public void onClick(View arg0) {
+	public void onClick(View arg0){
 
 		final String LOGIN = LogText.getText().toString();
 		final String PASS = PassText.getText().toString();
@@ -65,16 +65,17 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	}
 
 	public static class RegisterRequest {
-		String login;
-		String password;
+
+		String	login;
+		String	password;
 	}
 
 	public class MyAsyncTask extends AsyncTask<RegisterRequest, Void, RegisterResponse> {
 
-		ApiException exception;
+		ApiException	exception;
 
 		@Override
-		protected RegisterResponse doInBackground(RegisterRequest... params) {
+		protected RegisterResponse doInBackground(RegisterRequest... params){
 			try {
 				return new API().register(params[0].login, params[0].password);
 			} catch (ApiException apIexception) {
@@ -84,7 +85,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 		}
 
 		@Override
-		protected void onPostExecute(RegisterResponse result) {
+		protected void onPostExecute(RegisterResponse result){
 			Log.d("test", "onPostExecute 1");
 			super.onPostExecute(result);
 			Log.d("test", "onPostExecute 2");

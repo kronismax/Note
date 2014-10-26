@@ -6,13 +6,13 @@ public class ApiException extends Exception {
 		ERROR_CONNECTION, ERROR_JSON, ERROR
 	};
 
-	static TypeOfError typeOfError;
+	static TypeOfError	typeOfError;
 
-	public TypeOfError getError() {
+	public TypeOfError getError(){
 		return typeOfError;
 	}
 
-	public ApiException(TypeOfError typeOfError, Throwable throwable) {
+	public ApiException(TypeOfError typeOfError,Throwable throwable) {
 		super(throwable);
 		this.typeOfError = typeOfError;
 	}
