@@ -264,20 +264,26 @@ public class API {
 
 	}
 
-	public class GetNoteResponse {
+	public static class GetNoteResponse {
 
-		int		getNoteResponse;
-		String	title;
-		String	content;
+		public int	result;
+		String		title;
+		String		content;
 
-		public GetNoteResponse(int getNoteResponse,String title,String content) {
-			this.getNoteResponse = getNoteResponse;
-			this.title = title;
-			this.content = content;
+		public GetNoteResponse(JSONObject obj) throws ApiException {
+
+			try {
+				result = obj.getInt("result");
+				title = obj.getString("title");
+				content = obj.getString("content");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
 		}
 
-		public int getGetNote(){
-			return getNoteResponse;
+		public int getResult(){
+			return result;
 		}
 
 		public String getTitle(){
@@ -289,54 +295,43 @@ public class API {
 		}
 	}
 
-	public GetNoteResponse getNote(String sessionID, long noteID) throws ApiException{
-		int getNoteResponse;
-		String title;
-		String content;
+	public static GetNoteResponse getNote(String sessionID, long noteID) throws ApiException{
+        String rawResponse = GET(createUrlBuilder().appendPath("getNote")
+                .appendQueryParameter("sessionID", sessionID)
+                .appendQueryParameter("noteID", Long.toString(noteID))
+                .toString());
+        GetNoteResponse response = null;
+        try {
+            response = new GetNoteResponse(new JSONObject(rawResponse));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
 
-		Uri.Builder builder = API.builder("getNote");
-		Log.d("e", "id: " + noteID);
-		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", Long.toString(noteID));
-		String a = GET(builder.build().toString());
+	public static class EditNoteResponse {
 
-		try {
-			JSONObject json = new JSONObject(a);
-			getNoteResponse = json.getInt("result");
-			title = json.getString("title");
-			content = json.getString("content");
-		} catch (Exception e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
-		}
-		return new GetNoteResponse(getNoteResponse, title, content);
-	}
+		public int	result;
 
-	public class EditNoteResponse {
+		public EditNoteResponse(JSONObject obj) throws JSONException {
+			result = obj.getInt("result");
 
-		int	editNoteResponse;
-
-		public EditNoteResponse(int editNoteResponse) {
-			this.editNoteResponse = editNoteResponse;
-		}
-
-		public int getEditNoteResponse(){
-			return editNoteResponse;
 		}
 	}
 
-	public EditNoteResponse getEditNote(String sessionID, long noteID, String text) throws ApiException{
-		int EditNoteResponse;
-		Uri.Builder builder = API.builder("editNote");
-		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("noteID", Long.toString(noteID)).appendQueryParameter("text", text);
-		Log.d("EDIT_NOTE", builder.build().toString());
+	public static EditNoteResponse getEditNote(String sessionID, long noteID, String text) throws ApiException{
+        String rawResponse = GET(createUrlBuilder().appendPath("editNote")
+                .appendQueryParameter("sessionID", sessionID)
+                .appendQueryParameter("noteID", String.valueOf(noteID))
+                .appendQueryParameter("text", text)
+                .toString());
+		EditNoteResponse response = null;
 		try {
-			JSONObject json = new JSONObject(GET(builder.build().toString()));
-			EditNoteResponse = json.getInt("result");
-		} catch (Exception e) {
-			Log.d("GetNote", e.toString());
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			response = new EditNoteResponse(new JSONObject(rawResponse));
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-
-		return new EditNoteResponse(EditNoteResponse);
+		return response;
 	}
 
 	public class DeleteNoteResponse {

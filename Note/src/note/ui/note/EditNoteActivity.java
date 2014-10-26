@@ -8,20 +8,25 @@ import note.api.ApiException;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.model.database.NoteDatabaseColumns.TableNote;
-import note.utils.UIUtils;
+import note.ui.note.EditNoteActivity.EditNote;
+import note.ui.note.EditNoteActivity.GetNote;
 import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -38,26 +43,8 @@ public class EditNoteActivity extends Activity {
 	protected NoteAdapter			noteAdapter;
 	ContentValues					contentValues	= new ContentValues();
 	Cursor							c;
-
-	public class GetNote {
-
-		private long	noteID;
-		private String	sessionID;
-
-		public GetNote(String sessionID,long noteID) {
-			this.noteID = noteID;
-			this.sessionID = sessionID;
-		}
-
-		public long getNoteID(){
-			return noteID;
-		}
-
-		public String getSessionID(){
-			return sessionID;
-		}
-	}
-
+	private final String			GET_NOTE_KEY	= "GET_NOTE_KEY";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -69,7 +56,10 @@ public class EditNoteActivity extends Activity {
 		//noteAdapter = new NoteAdapter(this, c = (db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myContent, null, null, null, null, TableNote._ID)));
 		noteAdapter = new NoteAdapter(this, c = (getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID)));
 		
-		new GetNoteAsyncTask().execute(new GetNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1)));
+		Bundle getNoteBundle = new Bundle();
+        GetNote getNote = new GetNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1));
+        getNoteBundle.putParcelable(GET_NOTE_KEY, getNote);
+        getLoaderManager().initLoader(1, getNoteBundle, getNoteResponseLoaderCallbacks).forceLoad();
 		editNote.requestFocus();
 	};
 
@@ -84,8 +74,12 @@ public class EditNoteActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()) {
 			case R.id.action_edit_note:
-				new EditNoteAsyncTask().execute(new EditNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1), editNote
-						.getText().toString()));
+				Bundle editNoteBundle = new Bundle();
+                EditNote editNoteLoader = new EditNote(((MyApplication) getApplication()).getLocalData().getSessionId(), getIntent().getLongExtra(LONG_EXTRA, -1),
+                        editNote.getText().toString());
+                editNoteBundle.putParcelable(EDIT_NOTE_KEY, editNoteLoader);
+                Log.d("actionEdit", "editNoteBundle" + editNoteBundle);
+                getLoaderManager().initLoader(4, editNoteBundle, editNoteResponseLoaderCallbacks).forceLoad();
 				Intent intent = new Intent(EditNoteActivity.this, NoteActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
@@ -99,148 +93,193 @@ public class EditNoteActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	};
 
-	public class EditNote {
+	 public LoaderManager.LoaderCallbacks<GetNoteResponse> getNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<GetNoteResponse>() {
 
-		private long	noteID;
-		private String	sessionID;
-		private String	text;
+	        @Override
+	        public Loader<GetNoteResponse> onCreateLoader(int id, Bundle args) {
+	            return new GetNoteLoader(EditNoteActivity.this, (GetNote) args.getParcelable(GET_NOTE_KEY));
+	        }
 
-		public EditNote(String sessionID,long noteID,String text) {
-			this.noteID = noteID;
-			this.sessionID = sessionID;
-			this.text = text;
+	        @Override
+	        public void onLoadFinished(Loader<GetNoteResponse> loader, GetNoteResponse data) {
+	            getActionBar().setTitle(data.getTitle());
+	            editNote.setText(data.getContent());
+	        }
+
+	        @Override
+	        public void onLoaderReset(Loader<GetNoteResponse> loader) {
+
+	        }
+	    };
+	    private final String EDIT_NOTE_KEY = "EDIT_NOTE_KEY";
+	    public LoaderManager.LoaderCallbacks<EditNoteResponse> editNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<EditNoteResponse>() {
+	        EditNote request;
+
+	        @Override
+	        public Loader<EditNoteResponse> onCreateLoader(int id, Bundle args) {
+	            request = (EditNote) args.getParcelable(EDIT_NOTE_KEY);
+	            return new EditNoteLoader(EditNoteActivity.this, (EditNote) args.getParcelable(EDIT_NOTE_KEY));
+	        }
+
+	        @Override
+	        public void onLoadFinished(Loader<EditNoteResponse> loader, EditNoteResponse data) {
+
+	            ContentValues contentValues = new ContentValues();
+	            contentValues.put(NoteDatabaseColumns.TableNote._ID, request.getNoteID());
+	            contentValues.put(NoteDatabaseColumns.TableNote.TITLE, request.text);
+
+
+	            getContentResolver().update(MyContentProvider.URI_NOTE, contentValues, NoteDatabaseColumns.TableNote._ID + " = " + request.getNoteID(), null);
+	            getContentResolver().delete(MyContentProvider.URI_NOTE, null, null); ///////////////////
+	            Toast toast = Toast.makeText(EditNoteActivity.this, "Успех", Toast.LENGTH_LONG);
+	            toast.setGravity(Gravity.BOTTOM, 10, 50);
+	            toast.show();
+	        }
+
+	        @Override
+	        public void onLoaderReset(Loader<EditNoteResponse> loader) {
+
+	        }
+	    };
+	    
+	    public static class GetNoteLoader extends AsyncTaskLoader<API.GetNoteResponse>{
+	        public GetNote getNote;
+
+	        public GetNoteLoader(Context context, GetNote getNote) {
+	            super(context);
+	            this.getNote = getNote;
 		}
-
-		public long getNoteID(){
-			return noteID;
-		}
-
-		public String getSessionID(){
-			return sessionID;
-		}
-
-		public String getText(){
-			return text;
-		}
-	}
-
-	public class EditNoteAsyncTask extends AsyncTask<EditNote, Void, EditNoteResponse> {
-
-		//DBHelper		db	= new DBHelper(EditNoteActivity.this);
-		ApiException	apiexception;
 
 		@Override
-		protected void onPreExecute(){
-			super.onPreExecute();
-		}
-
-		API	API	= new API();
-
-		@Override
-		protected EditNoteResponse doInBackground(EditNote... params){
-
-			Log.d("Реадктирование", "" + params[0].text);
-			
+		public API.GetNoteResponse loadInBackground(){
 			try {
-				contentValues.put(NoteDatabaseColumns.TableNote._ID, params[0].getNoteID());
-				contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, params[0].text);
-
-				//db.getWritableDatabase().replace(DBHelper.Tables.TABLE_NOTE, null, contentValues);
-				//c = db.getReadableDatabase().query(DBHelper.Tables.TABLE_NOTE, myColumns, null, null, null, null, TableNote._ID);
-				
-				getContentResolver().update(MyContentProvider.URI_NOTE, contentValues, NoteDatabaseColumns.TableNote._ID + "=" + params[0].getNoteID(), null);
-				Cursor c = getContentResolver().query(MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID);
-				noteAdapter.swapCursor(c);
-
-				noteAdapter.swapCursor(c);
-				noteAdapter.notifyDataSetChanged();
-				return API.getEditNote(params[0].sessionID, params[0].noteID, params[0].text);
-			} catch (ApiException e) {
-				apiexception = e;
-				e.printStackTrace();
+				return API.getNote(getNote.getSessionID(), getNote.getNoteID());
+			} catch (ApiException apIexception) {
+				apIexception.printStackTrace();
 			}
 			return null;
 		}
-
-		@Override
-		protected void onPostExecute(EditNoteResponse result){
-			super.onPostExecute(result);
-
-			if (result == null) {
-				UIUtils.showToastByException(EditNoteActivity.this, apiexception);
-			} else {
-				switch (result.getEditNoteResponse()) {
-					case 0:
-						noteAdapter.swapCursor(c);
-						noteAdapter.notifyDataSetChanged();
-						Toast toast = Toast.makeText(EditNoteActivity.this, "Красава", Toast.LENGTH_LONG);
-						toast.setGravity(Gravity.BOTTOM, 10, 50);
-						toast.show();
-						break;
-					case 2:
-						Toast toast1 = Toast.makeText(EditNoteActivity.this, "Что то не так", Toast.LENGTH_LONG);
-						toast1.setGravity(Gravity.BOTTOM, 10, 50);
-						toast1.show();
-						break;
-					default:
-						Toast toast2 = Toast.makeText(EditNoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
-						toast2.setGravity(Gravity.BOTTOM, 10, 50);
-						toast2.show();
-						break;
-				}
-			}
-		}
 	}
 
-	public class GetNoteAsyncTask extends AsyncTask<GetNote, Void, GetNoteResponse> {
+	public static class EditNoteLoader extends AsyncTaskLoader<EditNoteResponse> {
 
-		ApiException	apiexception;
-		GetNote			request;
+		EditNote	editNote;
 
-		@Override
-		protected void onPreExecute(){
-			super.onPreExecute();
+		public EditNoteLoader(Context context,EditNote editNote) {
+			super(context);
+
+			this.editNote = editNote;
 		}
 
 		@Override
-		protected GetNoteResponse doInBackground(GetNote... params){
-			API API = new API();
+		public EditNoteResponse loadInBackground(){
 			try {
-				request = params[0];
-				return API.getNote(params[0].sessionID, params[0].noteID);
-			} catch (ApiException e) {
-				apiexception = e;
-
-				e.printStackTrace();
+				return API.getEditNote(editNote.sessionID, editNote.noteID, editNote.text);
+			} catch (ApiException apIexception) {
+				apIexception.printStackTrace();
 			}
 			return null;
 		}
-
-		@Override
-		protected void onPostExecute(GetNoteResponse result){
-			super.onPostExecute(result);
-
-			if (result == null) {
-				UIUtils.showToastByException(EditNoteActivity.this, apiexception);
-			} else {
-				switch (result.getGetNote()) {
-					case 0:
-						getActionBar().setTitle("Ред. заметки " + result.getTitle());
-						editNote.setText(result.getContent());
-						break;
-					case 2:
-						Toast toast1 = Toast.makeText(EditNoteActivity.this, "Что то не так", Toast.LENGTH_LONG);
-						toast1.setGravity(Gravity.BOTTOM, 10, 50);
-						toast1.show();
-
-						break;
-					default:
-						Toast toast2 = Toast.makeText(EditNoteActivity.this, "Эксэпшн", Toast.LENGTH_LONG);
-						toast2.setGravity(Gravity.BOTTOM, 10, 50);
-						toast2.show();
-						break;
-				}
-			}
-		}
 	}
+
+    public class GetNote implements Parcelable {
+        public final Creator<GetNote> CREATOR = new Parcelable.Creator<GetNote>() {
+
+            @Override
+            public GetNote createFromParcel(Parcel source) {
+                return new GetNote(source);
+            }
+
+            @Override
+            public GetNote[] newArray(int size) {
+                return new GetNote[size];
+            }
+        };
+        private long noteID;
+        private String sessionID;
+
+        public GetNote(String sessionID, long noteID) {
+        	this.noteID = noteID;
+        	this.sessionID = sessionID;
+        }
+
+        public GetNote(Parcel source) {
+            source.writeLong(noteID);
+            source.writeString(sessionID);
+        }
+
+        public long getNoteID() {
+            return noteID;
+        }
+
+        public String getSessionID() {
+            return sessionID;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(noteID);
+            dest.writeString(sessionID);
+        }
+    }
+
+    public class EditNote implements Parcelable {
+        public final Creator<EditNote> CREATOR = new Parcelable.Creator<EditNote>() {
+
+            @Override
+            public EditNote createFromParcel(Parcel source) {
+                return new EditNote(source);
+            }
+
+            @Override
+            public EditNote[] newArray(int size) {
+                return new EditNote[size];
+            }
+        };
+        private long noteID;
+        private String sessionID;
+        private String text;
+
+        public EditNote(String sessionID, long noteID, String text) {
+            this.noteID = noteID;
+            this.sessionID = sessionID;
+            this.text = text;
+        }
+
+        public EditNote(Parcel source) {
+            source.writeLong(noteID);
+            source.writeString(sessionID);
+            source.writeString(text);
+        }
+
+        public long getNoteID() {
+            return noteID;
+        }
+
+        public String getSessionID() {
+            return sessionID;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(noteID);
+            dest.writeString(sessionID);
+            dest.writeString(text);
+        }
+    }
+	
 }

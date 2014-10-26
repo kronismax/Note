@@ -160,7 +160,7 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
             contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, request.content);
             contentValues.put(NoteDatabaseColumns.TableNote._ID, data.getNoteID());
             getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
-
+            getContentResolver().delete(MyContentProvider.URI_NOTE, null, null); /////////////////////////////////
             Intent intentLogOut = new Intent(NewNoteActivity.this, NoteActivity.class);
             intentLogOut.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intentLogOut);
@@ -218,10 +218,10 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
             content = source.readString();
         }
 
-        public NoteCreate(String _sessionID, String _title, String _content) {
-            sessionID = _sessionID;
-            title = _title;
-            content = _content;
+        public NoteCreate(String sessionID, String title, String content) {
+            this.sessionID = sessionID;
+            this.title = title;
+            this.content = content;
         }
 
         @Override

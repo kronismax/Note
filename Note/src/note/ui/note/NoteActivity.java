@@ -9,7 +9,6 @@ import note.api.ApiException;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
 import note.ui.login.MainActivity;
-import note.ui.note.NoteActivity.DeleteRequest;
 import note.utils.UIUtils;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -27,7 +26,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -398,10 +396,10 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		noteAdapter.swapCursor(null);
 	}
 
-	public static class NoteListAsyncTaskLoader extends AsyncTaskLoader<API.NoteListResponse> {
+	public static class NoteListAsyncTaskLoader extends AsyncTaskLoader<NoteListResponse> {
 
 		  // We hold a reference to the Loader’s data here.
-		private API.NoteListResponse	mData;
+		private NoteListResponse	mData;
 		private String				sessionID;
 		
 		public NoteListAsyncTaskLoader(Context ctx, String ID) {
@@ -419,7 +417,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		  /****************************************************/
 
 		@Override
-		public API.NoteListResponse loadInBackground(){
+		public NoteListResponse loadInBackground(){
 		    // This method is called on a background thread and should generate a
 		    // new set of data to be delivered back to the client.
 			try {
@@ -446,9 +444,8 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 					contentValues[i].put(NoteDatabaseColumns.TableNote._ID, data.getNoteArray().get(i).noteID);
 					contentValues[i].put(NoteDatabaseColumns.TableNote.TITLE, data.getNoteArray().get(i).title);
 					contentValues[i].put(NoteDatabaseColumns.TableNote.CONTENT, data.getNoteArray().get(i).shortContent);
-
 				}
-				getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
+				getContentResolver().delete(MyContentProvider.URI_NOTE, null, null); ////////////////////////////////
 				getContentResolver().bulkInsert(MyContentProvider.URI_NOTE, contentValues);
     		}
     		getLoaderManager().destroyLoader(2);
