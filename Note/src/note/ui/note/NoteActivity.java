@@ -495,26 +495,30 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 	}
 	public long lastDeleteId;
 	private String DELETE_KEY_FOR_BUNDLE = "DELETE_KEY_FOR_BUNDLE";
-    public LoaderManager.LoaderCallbacks<DeleteNoteResponse> deleteNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<DeleteNoteResponse>() {
+	public LoaderManager.LoaderCallbacks<DeleteNoteResponse> deleteNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<DeleteNoteResponse>() {
 
-        public DeleteRequest request;
+		public DeleteRequest request;
 
-        @Override
-        public Loader<DeleteNoteResponse> onCreateLoader(int id, Bundle args) {
-            request = (DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE);
-            Log.d("DelrequesteteRequest", "request: " + request);
-            return new DeleteLoader(NoteActivity.this, (DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE));
-        }
+		@Override
+		public Loader<DeleteNoteResponse> onCreateLoader(int id, Bundle args) {
+			request = (DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE);
+			Log.d("DelrequesteteRequest", "request: " + request);
+			return new DeleteLoader(NoteActivity.this,
+					(DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE));
+		}
 
-        @Override
-        public void onLoadFinished(Loader<DeleteNoteResponse> loader, DeleteNoteResponse data) {
-            getContentResolver().delete(MyContentProvider.URI_NOTE, NoteDatabaseColumns.TableNote._ID + " = " + request.noteId, null);
-        }
+		@Override
+		public void onLoadFinished(Loader<DeleteNoteResponse> loader,
+				DeleteNoteResponse data) {
+			getContentResolver().delete(MyContentProvider.URI_NOTE,
+					NoteDatabaseColumns.TableNote._ID + " = " + request.noteId,
+					null);
+		}
 
-        @Override
-        public void onLoaderReset(Loader<DeleteNoteResponse> loader) {
-        }
-    };
+		@Override
+		public void onLoaderReset(Loader<DeleteNoteResponse> loader) {
+		}
+	};
     
     public static class DeleteLoader extends AsyncTaskLoader<DeleteNoteResponse> {
         public DeleteRequest deleteRequest;
@@ -531,25 +535,25 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
                 return API.deleteNote(deleteRequest.sessionID, deleteRequest.noteId);
 
             } catch (ApiException apIexception) {
-                apIexception.printStackTrace();
-            }
-            return null;
+				apIexception.printStackTrace();
+			}
+			return null;
         }
     }
 	
     public class DeleteRequest implements Parcelable {
-        public final Creator<DeleteRequest> CREATOR = new Parcelable.Creator<DeleteRequest>() {
+		public final Creator<DeleteRequest> CREATOR = new Parcelable.Creator<DeleteRequest>() {
 
-            @Override
-            public DeleteRequest createFromParcel(Parcel source) {
-                return new DeleteRequest(source);
-            }
+			@Override
+			public DeleteRequest createFromParcel(Parcel source) {
+				return new DeleteRequest(source);
+			}
 
-            @Override
-            public DeleteRequest[] newArray(int size) {
-                return new DeleteRequest[size];
-            }
-        };
+			@Override
+			public DeleteRequest[] newArray(int size) {
+				return new DeleteRequest[size];
+			}
+		};
         private String sessionID;
         private long noteId;
 
@@ -571,11 +575,10 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(sessionID);
-            dest.writeLong(noteId);
-
-        }
-    }
+			dest.writeString(sessionID);
+			dest.writeLong(noteId);
+		}
+	}
     
     
     

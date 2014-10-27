@@ -5,10 +5,15 @@ import note.api.ApiException;
 import note.api.API.RegisterResponse;
 import note.utils.UIUtils;
 import android.app.Fragment;
-import android.os.AsyncTask;
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
+import android.content.Loader;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +29,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	private EditText	PassText;
 	private EditText	RepeatPassText;
 	private Button		Registration;
-
 	API					api	= new API();
-
-	MyAsyncTask			mt;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance){
@@ -52,51 +54,139 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 		final String PASS = PassText.getText().toString();
 		final String REPEATPASS = RepeatPassText.getText().toString();
 		if ((PASS.equals(REPEATPASS) && !TextUtils.isEmpty(LOGIN) && !TextUtils.isEmpty(PASS) && !TextUtils.isEmpty(REPEATPASS))) {
-			RegisterRequest request = new RegisterRequest();
-			request.login = LOGIN;
-			request.password = PASS;
+			RegisterRequest request = new RegisterRequest(LOGIN, PASS);
 
 			Registration.setEnabled(false);
-			mt = new MyAsyncTask();
-			mt.execute(request);
+			Bundle loginBundle = new Bundle();
+			RegisterRequest registerRequest = new RegisterRequest(LOGIN, PASS);
+			loginBundle.putParcelable(KEY_FOR_REGISTER, registerRequest);
+			getLoaderManager().initLoader(1, loginBundle, registerResponseLoaderCallbacks).forceLoad();
 		} else {
 			Toast.makeText(getActivity(), "Введите корректные данные", Toast.LENGTH_SHORT).show();
 		}
 	}
 
-	public static class RegisterRequest {
+	public static class RegisterRequest implements Parcelable {
 
-		String	login;
-		String	password;
+        public final Creator<RegisterRequest> CREATOR = new Parcelable.Creator<RegisterRequest>() {
+
+            @Override
+            public RegisterRequest createFromParcel(Parcel source) {
+                return new RegisterRequest(source);
+            }
+
+            @Override
+            public RegisterRequest[] newArray(int size) {
+                return new RegisterRequest[size];
+            }
+        };
+        String login = "";
+        String pass = "";
+
+	public RegisterRequest(String login,String pass) {
+		this.login = login;
+		this.pass = pass;
+
 	}
 
-	public class MyAsyncTask extends AsyncTask<RegisterRequest, Void, RegisterResponse> {
+	public RegisterRequest(Parcel source) {
+		source.writeString(login);
+		source.writeString(pass);
+	}
 
-		ApiException	exception;
+	@Override
+	public int describeContents(){
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags){
+		dest.writeString(login);
+		dest.writeString(pass);
+	}
+}
+
+	
+	private final String KEY_FOR_REGISTER = "KEY_FOR_REGISTER";
+	public LoaderManager.LoaderCallbacks<RegisterResponse> registerResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<RegisterResponse>() {
+		RegisterRequest request;
 
 		@Override
-		protected RegisterResponse doInBackground(RegisterRequest... params){
+		public Loader<RegisterResponse> onCreateLoader(int id, Bundle args) {
+			request = args.getParcelable(KEY_FOR_REGISTER);
+			return new RegisterAsyncTaskLoader(getActivity(),(RegisterRequest) args.getParcelable(KEY_FOR_REGISTER));
+		}
+
+		@Override
+		public void onLoadFinished(Loader<RegisterResponse> loader,RegisterResponse data) {
+			if (data.result == 0) {
+				Toast toast = Toast.makeText(getActivity(), "Красава",Toast.LENGTH_LONG);
+				toast.setGravity(Gravity.BOTTOM, 10, 50);
+				toast.show();
+				getActivity().getActionBar().setSelectedNavigationItem(0);
+			}
+			if (data.result == 1) {
+				Toast toast1 = Toast.makeText(getActivity(), "Попробуй позже",Toast.LENGTH_LONG);
+				toast1.setGravity(Gravity.BOTTOM, 10, 50);
+				toast1.show();
+			}
+		}
+
+		@Override
+		public void onLoaderReset(Loader<RegisterResponse> loader) {
+
+		}
+	};
+	
+	public static class RegisterAsyncTaskLoader extends AsyncTaskLoader<RegisterResponse> {
+
+		public RegisterRequest	registerRequest;
+
+		public RegisterAsyncTaskLoader(Context context,RegisterRequest registerRequest) {
+			super(context);
+			this.registerRequest = registerRequest;
+		}
+
+		@Override
+		public RegisterResponse loadInBackground(){
 			try {
-				return new API().register(params[0].login, params[0].password);
+				return new API().register(registerRequest.login, registerRequest.pass);
 			} catch (ApiException apIexception) {
-				exception = apIexception;
+				apIexception.printStackTrace();
 			}
 			return null;
 		}
-
-		@Override
-		protected void onPostExecute(RegisterResponse result){
-			Log.d("test", "onPostExecute 1");
-			super.onPostExecute(result);
-			Log.d("test", "onPostExecute 2");
-			Registration.setEnabled(true);
-			Log.d("test", "onPostExecute 3");
-			if (result == null) {
-				UIUtils.showToastByException(getActivity(), exception);
-			} else {
-				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
-				getActivity().getActionBar().setSelectedNavigationItem(0);
-			}
-		}
 	}
+	
+	
+	
+//	public class MyAsyncTask extends AsyncTask<RegisterRequest, Void, RegisterResponse> {
+//
+//		ApiException	exception;
+//
+//		@Override
+//		protected RegisterResponse doInBackground(RegisterRequest... params){
+//			try {
+//				return new API().register(params[0].login, params[0].password);
+//			} catch (ApiException apIexception) {
+//				exception = apIexception;
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(RegisterResponse result){
+//			Log.d("test", "onPostExecute 1");
+//			super.onPostExecute(result);
+//			Log.d("test", "onPostExecute 2");
+//			Registration.setEnabled(true);
+//			Log.d("test", "onPostExecute 3");
+//			if (result == null) {
+//				UIUtils.showToastByException(getActivity(), exception);
+//			} else {
+//				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
+//				getActivity().getActionBar().setSelectedNavigationItem(0);
+//			}
+//		}
+//	}
 }

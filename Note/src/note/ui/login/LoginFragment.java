@@ -159,44 +159,44 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	}
 
 	public LoaderManager.LoaderCallbacks<LoginResponse> loginResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<LoginResponse>() {
-        LoginRequest request;
+		LoginRequest request;
 
-        @Override
-        public Loader<LoginResponse> onCreateLoader(int id, Bundle args) {
-            request = args.getParcelable(KEY_FOR_LOGIN);
-            return new LoginAsyncTaskLoader(getActivity(), (LoginRequest) args.getParcelable(KEY_FOR_LOGIN));
-        }
+		@Override
+		public Loader<LoginResponse> onCreateLoader(int id, Bundle args) {
+			request = args.getParcelable(KEY_FOR_LOGIN);
+			return new LoginAsyncTaskLoader(getActivity(), (LoginRequest) args.getParcelable(KEY_FOR_LOGIN));
+		}
 
-        @Override
-        public void onLoadFinished(Loader<LoginResponse> loader, LoginResponse data) {
-            if (data.getUserCreate() == 0) {
-                ((MyApplication) getActivity().getApplication()).getLocalData().setSessionId(data.sessionID);
-                Toast toast = Toast.makeText(getActivity(), "Красава", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.BOTTOM, 10, 50);
-                toast.show();
+		@Override
+		public void onLoadFinished(Loader<LoginResponse> loader, LoginResponse data) {
+			if (data.getUserCreate() == 0) {
+				((MyApplication) getActivity().getApplication()).getLocalData().setSessionId(data.sessionID);
+				Toast toast = Toast.makeText(getActivity(), "Красава",Toast.LENGTH_LONG);
+				toast.setGravity(Gravity.BOTTOM, 10, 50);
+				toast.show();
 
-                SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
-                String stringPreference = preferences.getString("login", "");
-                if (!TextUtils.isEmpty(stringPreference)&& !(stringPreference.equals(LogText.getText().toString()))) {
-                	getActivity().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
-                }
-                saveLastLogin();
-                Intent intent = new Intent(getActivity(), NoteActivity.class);
-                startActivity(intent);
+				SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS,Context.MODE_PRIVATE);
+				String stringPreference = preferences.getString("login", "");
+				if (!TextUtils.isEmpty(stringPreference)&& !(stringPreference.equals(LogText.getText().toString()))) {
+					getActivity().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
+				}
+				saveLastLogin();
+				Intent intent = new Intent(getActivity(), NoteActivity.class);
+				startActivity(intent);
 
-            }
-            if (data.getUserCreate() == 1) {
-                Toast toast1 = Toast.makeText(getActivity(), "Попробуй позже", Toast.LENGTH_LONG);
-                toast1.setGravity(Gravity.BOTTOM, 10, 50);
-                toast1.show();
-            }
-        }
+			}
+			if (data.getUserCreate() == 1) {
+				Toast toast1 = Toast.makeText(getActivity(), "Попробуй позже",Toast.LENGTH_LONG);
+				toast1.setGravity(Gravity.BOTTOM, 10, 50);
+				toast1.show();
+			}
+		}
 
-        @Override
-        public void onLoaderReset(Loader<LoginResponse> loader) {
+		@Override
+		public void onLoaderReset(Loader<LoginResponse> loader) {
 
-        	}
-		};
+		}
+	};
 
 	public static class LoginAsyncTaskLoader extends AsyncTaskLoader<LoginResponse> {
 

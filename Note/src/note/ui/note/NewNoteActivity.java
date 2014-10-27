@@ -104,31 +104,25 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 	public class NewNoteRequest {
 
-		String	sessionId;
-		String	title;
-		String	text;
+		String sessionId;
+		String title;
+		String text;
 
 		public NewNoteRequest(String id,String title,String text) {
 			sessionId = id;
 			this.title = title;
 			this.text = text;
 		}
-
 		public String getTitile(){
 			return title;
 		}
-
 		public String getContent(){
 			return text;
 		}
-
 		public String getSessionID(){
 			return sessionId;
 		}
-
 	}
-
-	
 
 	@Override
 	public void onClick(View arg0){
@@ -137,19 +131,18 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 				Bundle bundle = new Bundle();
 				for (int i = 1; i < 6; i++) {
 					bundle.putParcelable(KEY_FOR_NOTE_CREATE, new NoteCreate(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
-					getLoaderManager().initLoader(i+3, bundle, createNoteResponseLoaderCallbacks).forceLoad();
+					getLoaderManager().initLoader(i, bundle, createNoteResponseLoaderCallbacks).forceLoad();
 				}
 				break;
 		}
-
 	}
 	
 	public LoaderManager.LoaderCallbacks<NewNoteResponse> createNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<NewNoteResponse>() {
         NoteCreate request;
-
+        
         @Override
         public Loader<NewNoteResponse> onCreateLoader(int id, Bundle args) {
-            request = args.getParcelable(KEY_FOR_NOTE_CREATE);
+        	request = args.getParcelable(KEY_FOR_NOTE_CREATE);
             return new NoteCreateLoader(NewNoteActivity.this, (NoteCreate) args.getParcelable(KEY_FOR_NOTE_CREATE));
         }
 
@@ -160,7 +153,6 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
             contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, request.content);
             contentValues.put(NoteDatabaseColumns.TableNote._ID, data.getNoteID());
             getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
-            getContentResolver().delete(MyContentProvider.URI_NOTE, null, null); /////////////////////////////////
             Intent intentLogOut = new Intent(NewNoteActivity.this, NoteActivity.class);
             intentLogOut.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intentLogOut);
@@ -187,8 +179,6 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 				return API.newNote(noteCreate.sessionID, noteCreate.title, noteCreate.content);
 			} catch (ApiException e) {
 				e.printStackTrace();
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
 			return null;
 		}
@@ -208,9 +198,9 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
                 return new NoteCreate[size];
             }
         };
-        private String sessionID;
-        private String title;
-        private String content;
+		private String sessionID;
+		private String title;
+		private String content;
 
         public NoteCreate(Parcel source) {
             sessionID = source.readString();

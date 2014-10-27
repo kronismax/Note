@@ -93,24 +93,25 @@ public class EditNoteActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	};
 
-	 public LoaderManager.LoaderCallbacks<GetNoteResponse> getNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<GetNoteResponse>() {
+	public LoaderManager.LoaderCallbacks<GetNoteResponse> getNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<GetNoteResponse>() {
+		@Override
+		public Loader<GetNoteResponse> onCreateLoader(int id, Bundle args) {
+			return new GetNoteLoader(EditNoteActivity.this,
+					(GetNote) args.getParcelable(GET_NOTE_KEY));
+		}
 
-	        @Override
-	        public Loader<GetNoteResponse> onCreateLoader(int id, Bundle args) {
-	            return new GetNoteLoader(EditNoteActivity.this, (GetNote) args.getParcelable(GET_NOTE_KEY));
-	        }
+		@Override
+		public void onLoadFinished(Loader<GetNoteResponse> loader,
+				GetNoteResponse data) {
+			getActionBar().setTitle(data.getTitle());
+			editNote.setText(data.getContent());
+		}
 
-	        @Override
-	        public void onLoadFinished(Loader<GetNoteResponse> loader, GetNoteResponse data) {
-	            getActionBar().setTitle(data.getTitle());
-	            editNote.setText(data.getContent());
-	        }
+		@Override
+		public void onLoaderReset(Loader<GetNoteResponse> loader) {
 
-	        @Override
-	        public void onLoaderReset(Loader<GetNoteResponse> loader) {
-
-	        }
-	    };
+		}
+	};
 	    private final String EDIT_NOTE_KEY = "EDIT_NOTE_KEY";
 	    public LoaderManager.LoaderCallbacks<EditNoteResponse> editNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<EditNoteResponse>() {
 	        EditNote request;
@@ -126,11 +127,10 @@ public class EditNoteActivity extends Activity {
 
 	            ContentValues contentValues = new ContentValues();
 	            contentValues.put(NoteDatabaseColumns.TableNote._ID, request.getNoteID());
-	            contentValues.put(NoteDatabaseColumns.TableNote.TITLE, request.text);
-
-
+	            contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, request.text);
+	            
 	            getContentResolver().update(MyContentProvider.URI_NOTE, contentValues, NoteDatabaseColumns.TableNote._ID + " = " + request.getNoteID(), null);
-	            getContentResolver().delete(MyContentProvider.URI_NOTE, null, null); ///////////////////
+	            
 	            Toast toast = Toast.makeText(EditNoteActivity.this, "Успех", Toast.LENGTH_LONG);
 	            toast.setGravity(Gravity.BOTTOM, 10, 50);
 	            toast.show();

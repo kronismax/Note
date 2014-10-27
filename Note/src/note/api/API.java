@@ -26,12 +26,6 @@ import android.util.Log;
 
 public class API {
 	
-	public static Uri.Builder builder(String oper){
-		Uri.Builder builder = new Uri.Builder();
-		builder.scheme("http").encodedAuthority("notes-androidcoursesdp.rhcloud.com").appendPath("REST").appendPath(oper);
-		return builder;
-	}
-
 	public static String GET(String url) throws ApiException{
 
 		Log.d("e", "request:" + url);
@@ -61,6 +55,20 @@ public class API {
 		return new Uri.Builder().scheme("http").encodedAuthority("notes-androidcoursesdp.rhcloud.com").appendPath("REST");
 	}
 	
+	// convert inputstream to String
+		private static String convertInputStreamToString(InputStream inputStream) throws IOException{
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			String line = "";
+			String result = "";
+			while ((line = bufferedReader.readLine()) != null) {
+				result += line;
+			}
+			inputStream.close();
+			return result;
+		}
+		
+///////////////////////           LOGIN         /////////////////////////////////////
+	
 	public static class LoginResponse {
 
 		public String	sessionID	= "";
@@ -70,7 +78,6 @@ public class API {
 			try {
 				sessionID = obj.getString("sessionID");
 				result = obj.getInt("result");
-
 			} catch (JSONException e) {
 				throw new ApiException(ApiException.TypeOfError.ERROR_JSON, e);
 			}
@@ -88,84 +95,108 @@ public class API {
 	}
 
 	public LoginResponse login(String login, String password) throws ApiException{
-		try {
-			String rawResponse = GET("http://notes-androidcoursesdp.rhcloud.com/REST/login?login=" + login + "&pass=" + password);
-			return new LoginResponse(new JSONObject(rawResponse));
-		} catch (JSONException e) {
-			throw new ApiException(ApiException.typeOfError.ERROR_JSON, e);
-		}
+        String rawResponse = GET(createUrlBuilder().appendPath("login")
+                .appendQueryParameter("login", login)
+                .appendQueryParameter("pass", password)
+                .toString());
+        LoginResponse response = null;
+        try {
+            response = new LoginResponse(new JSONObject(rawResponse));
+        } catch (JSONException e) {
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
+        }
+        return response;
 	}
 
+///////////////////////           REGISTRATION         /////////////////////////////////////
+	
 	public RegisterResponse register(String login, String password) throws ApiException{
-		int userRegister;
-		Uri.Builder builder = API.builder("register");
-		builder.appendQueryParameter("login", login).appendQueryParameter("pass", password);
-		Log.d("register", builder.build().toString());
-		try {
-			JSONObject json = new JSONObject(GET(builder.build().toString()));
-			userRegister = json.getInt("result");
-		} catch (JSONException e) {
-			Log.d("regist", e.toString());
+//		int userRegister;
+//		Uri.Builder builder = API.builder("register");
+//		builder.appendQueryParameter("login", login).appendQueryParameter("pass", password);
+//		Log.d("register", builder.build().toString());
+//		try {
+//			JSONObject json = new JSONObject(GET(builder.build().toString()));
+//			userRegister = json.getInt("result");
+//		} catch (JSONException e) {
+//			Log.d("regist", e.toString());
+//			throw new ApiException(TypeOfError.ERROR_JSON, e);
+//		}
+//		return new RegisterResponse(userRegister);
+        String rawResponse = GET(createUrlBuilder().appendPath("register")
+                .appendQueryParameter("login", login)
+                .appendQueryParameter("pass", password)
+                .toString());
+        RegisterResponse response = null;
+        try {
+            response = new RegisterResponse(new JSONObject(rawResponse));
+        } catch (JSONException e) {
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
-		}
-		return new RegisterResponse(userRegister);
+        }
+        return response;
 	}
+
 
 	public static class RegisterResponse {
+		public int result;
 
-		public int	userCreate;
+		public RegisterResponse(JSONObject obj) throws ApiException {
+			try {
+				result = obj.getInt("result");
+			} catch (JSONException e) {
+				throw new ApiException(ApiException.TypeOfError.ERROR_JSON, e);
+			}
 
-		public RegisterResponse() {
-		}
-
-		public RegisterResponse(int userCreate) {
-			this.userCreate = userCreate;
 		}
 	}
 
-	// convert inputstream to String
-	private static String convertInputStreamToString(InputStream inputStream) throws IOException{
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		String line = "";
-		String result = "";
-		while ((line = bufferedReader.readLine()) != null) {
-			result += line;
-		}
-		inputStream.close();
-		return result;
-	}
-
+///////////////////////           CHANGE PASSWORD         /////////////////////////////////////
+	
 	public static class ChengPasswordResponse {
+		public int result;
 
-		int	userChengPassword;
-
-		public ChengPasswordResponse(int userChengPassword) {
-			this.userChengPassword = userChengPassword;
-		}
-
-		public int getChengPasswordResponse(){
-			return userChengPassword;
+		public ChengPasswordResponse(JSONObject obj) throws ApiException {
+			try {
+				result = obj.getInt("result");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public ChengPasswordResponse chengPassword(String sessionID, String newPassword, String oldPassword) throws ApiException{
-		int userChengPassword;
-
-		Uri.Builder builder = API.builder("changePassword");
-		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("oldPass", oldPassword).appendQueryParameter("newPass", newPassword);
-
-		Log.d("chengPassword", builder.build().toString());
-
-		String a = GET(builder.build().toString());
-		try {
-			JSONObject json = new JSONObject(a);
-			userChengPassword = json.getInt("result");
-		} catch (Exception e) {
+		String rawResponse = GET(createUrlBuilder().appendPath("register")
+                .appendQueryParameter("sessionID", sessionID)
+                .appendQueryParameter("oldPass", oldPassword)
+                .appendQueryParameter("newPass", newPassword)
+                .toString());
+		ChengPasswordResponse response = null;
+        try {
+            response = new ChengPasswordResponse(new JSONObject(rawResponse));
+        } catch (JSONException e) {
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
-		}
-		return new ChengPasswordResponse(userChengPassword);
+        }
+        return response;
+		
+//		int userChengPassword;
+//
+//		Uri.Builder builder = API.builder("changePassword");
+//		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("oldPass", oldPassword).appendQueryParameter("newPass", newPassword);
+//
+//		Log.d("chengPassword", builder.build().toString());
+//
+//		String a = GET(builder.build().toString());
+//		try {
+//			JSONObject json = new JSONObject(a);
+//			userChengPassword = json.getInt("result");
+//		} catch (Exception e) {
+//			throw new ApiException(TypeOfError.ERROR_JSON, e);
+//		}
+//		return new ChengPasswordResponse(userChengPassword);
 	}
 
+	/////////////////////////           LOG OUT         ////////////////////////////////////////
+	
 	public class LogOutResponse {
 		public int	result;
 		public LogOutResponse(JSONObject obj) throws ApiException {
@@ -188,6 +219,10 @@ public class API {
 		return response;
 	}
 
+/////////////////////////           NEW NOTE         ////////////////////////////////////////
+	
+	// example !
+	
 	public static class NewNoteResponse {
 
 		long	ID;
@@ -207,7 +242,7 @@ public class API {
 		}
 	}
 
-	public NewNoteResponse newNote(String ID, String title, String content) throws ApiException, JSONException{
+	public NewNoteResponse newNote(String ID, String title, String content) throws ApiException{
         String rawResponse = GET(createUrlBuilder().appendPath("createNote")
                 .appendQueryParameter("sessionID", ID)
                 .appendQueryParameter("title", title)
@@ -217,11 +252,13 @@ public class API {
         try {
             response = new NewNoteResponse(new JSONObject(rawResponse));
         } catch (JSONException e) {
-            e.printStackTrace();
+			throw new ApiException(TypeOfError.ERROR_JSON, e);
         }
         return response;
     }
 
+/////////////////////////           NOTE LIST         ////////////////////////////////////////
+	
 	public static class NoteResponse {
 
 		public String	title;
@@ -268,6 +305,8 @@ public class API {
 
 	}
 
+/////////////////////////           GET NOTE         ////////////////////////////////////////
+	
 	public static class GetNoteResponse {
 
 		public int	result;
@@ -338,6 +377,8 @@ public class API {
 		return response;
 	}
 
+///////////////////////           DELETE NOTE         ////////////////////////////////////////
+	
 	public class DeleteNoteResponse {
 
 		public int	result;
@@ -347,7 +388,7 @@ public class API {
         }
 
 	}
-
+	
 	public DeleteNoteResponse deleteNote(String sessionId, long noteId) throws ApiException{
 		String rawResponse = GET(createUrlBuilder().appendPath("deleteNote")
 				.appendQueryParameter("sessionID", sessionId)
