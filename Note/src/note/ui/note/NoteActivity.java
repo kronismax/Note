@@ -148,7 +148,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
 		switch (item.getItemId()) {
 			case R.id.action_changePassword:
-				Intent intentChangePassword = new Intent(this, ChengPasswordActivity.class);
+				Intent intentChangePassword = new Intent(this, ChangePasswordActivity.class);
 				startActivity(intentChangePassword);
 				return true;
 			case R.id.action_logOut:

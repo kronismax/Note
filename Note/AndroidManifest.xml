@@ -30,7 +30,7 @@
             android:label="Note" >
         </activity>
         <activity
-            android:name="note.ui.note.ChengPasswordActivity"
+            android:name="note.ui.note.ChangePasswordActivity"
             android:label="@string/action_changePassword" >
         </activity>
         <activity

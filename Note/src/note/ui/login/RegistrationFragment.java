@@ -157,36 +157,4 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 			return null;
 		}
 	}
-	
-	
-	
-//	public class MyAsyncTask extends AsyncTask<RegisterRequest, Void, RegisterResponse> {
-//
-//		ApiException	exception;
-//
-//		@Override
-//		protected RegisterResponse doInBackground(RegisterRequest... params){
-//			try {
-//				return new API().register(params[0].login, params[0].password);
-//			} catch (ApiException apIexception) {
-//				exception = apIexception;
-//			}
-//			return null;
-//		}
-//
-//		@Override
-//		protected void onPostExecute(RegisterResponse result){
-//			Log.d("test", "onPostExecute 1");
-//			super.onPostExecute(result);
-//			Log.d("test", "onPostExecute 2");
-//			Registration.setEnabled(true);
-//			Log.d("test", "onPostExecute 3");
-//			if (result == null) {
-//				UIUtils.showToastByException(getActivity(), exception);
-//			} else {
-//				Toast.makeText(getActivity(), "Красава", Toast.LENGTH_SHORT).show();
-//				getActivity().getActionBar().setSelectedNavigationItem(0);
-//			}
-//		}
-//	}
 }

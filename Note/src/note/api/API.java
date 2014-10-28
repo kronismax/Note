@@ -111,18 +111,7 @@ public class API {
 ///////////////////////           REGISTRATION         /////////////////////////////////////
 	
 	public RegisterResponse register(String login, String password) throws ApiException{
-//		int userRegister;
-//		Uri.Builder builder = API.builder("register");
-//		builder.appendQueryParameter("login", login).appendQueryParameter("pass", password);
-//		Log.d("register", builder.build().toString());
-//		try {
-//			JSONObject json = new JSONObject(GET(builder.build().toString()));
-//			userRegister = json.getInt("result");
-//		} catch (JSONException e) {
-//			Log.d("regist", e.toString());
-//			throw new ApiException(TypeOfError.ERROR_JSON, e);
-//		}
-//		return new RegisterResponse(userRegister);
+
         String rawResponse = GET(createUrlBuilder().appendPath("register")
                 .appendQueryParameter("login", login)
                 .appendQueryParameter("pass", password)
@@ -146,16 +135,15 @@ public class API {
 			} catch (JSONException e) {
 				throw new ApiException(ApiException.TypeOfError.ERROR_JSON, e);
 			}
-
 		}
 	}
 
 ///////////////////////           CHANGE PASSWORD         /////////////////////////////////////
 	
-	public static class ChengPasswordResponse {
+	public static class ChangePasswordResponse {
 		public int result;
 
-		public ChengPasswordResponse(JSONObject obj) throws ApiException {
+		public ChangePasswordResponse(JSONObject obj) throws ApiException {
 			try {
 				result = obj.getInt("result");
 			} catch (JSONException e) {
@@ -164,35 +152,19 @@ public class API {
 		}
 	}
 
-	public ChengPasswordResponse chengPassword(String sessionID, String newPassword, String oldPassword) throws ApiException{
-		String rawResponse = GET(createUrlBuilder().appendPath("register")
+	public static ChangePasswordResponse getChangePassword(String sessionID, String newPassword, String oldPassword) throws ApiException{
+		String rawResponse = GET(createUrlBuilder().appendPath("changePassword")
                 .appendQueryParameter("sessionID", sessionID)
-                .appendQueryParameter("oldPass", oldPassword)
                 .appendQueryParameter("newPass", newPassword)
+                .appendQueryParameter("oldPass", oldPassword)
                 .toString());
-		ChengPasswordResponse response = null;
-        try {
-            response = new ChengPasswordResponse(new JSONObject(rawResponse));
-        } catch (JSONException e) {
+		ChangePasswordResponse response = null;
+		try {
+			response = new ChangePasswordResponse(new JSONObject(rawResponse));
+		} catch (JSONException e) {
 			throw new ApiException(TypeOfError.ERROR_JSON, e);
-        }
-        return response;
-		
-//		int userChengPassword;
-//
-//		Uri.Builder builder = API.builder("changePassword");
-//		builder.appendQueryParameter("sessionID", sessionID).appendQueryParameter("oldPass", oldPassword).appendQueryParameter("newPass", newPassword);
-//
-//		Log.d("chengPassword", builder.build().toString());
-//
-//		String a = GET(builder.build().toString());
-//		try {
-//			JSONObject json = new JSONObject(a);
-//			userChengPassword = json.getInt("result");
-//		} catch (Exception e) {
-//			throw new ApiException(TypeOfError.ERROR_JSON, e);
-//		}
-//		return new ChengPasswordResponse(userChengPassword);
+		}
+		return response;
 	}
 
 	/////////////////////////           LOG OUT         ////////////////////////////////////////
