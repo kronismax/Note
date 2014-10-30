@@ -36,7 +36,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	private EditText			PassText;
 	private Button				Login;
 	private Button				Demo;
-	API							api				= new API();
 	private static final String	PREF_SETTINGS	= "Settings";
 	private final String KEY_FOR_LOGIN = "KEY_FOR_LOGIN";
 	@Override
@@ -169,6 +168,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 		@Override
 		public void onLoadFinished(Loader<LoginResponse> loader, LoginResponse data) {
+			if (data == null) {
+				final ApiException apiException = ((LoginAsyncTaskLoader) loader).e;
+				if (apiException != null) {
+					UIUtils.showToastByException(getActivity(), apiException);
+				}
+			}
 			if (data.getUserCreate() == 0) {
 				((MyApplication) getActivity().getApplication()).getLocalData().setSessionId(data.sessionID);
 				Toast toast = Toast.makeText(getActivity(), "Красава",Toast.LENGTH_LONG);
@@ -201,7 +206,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	public static class LoginAsyncTaskLoader extends AsyncTaskLoader<LoginResponse> {
 
 		public LoginRequest	loginRequest;
-
+		public ApiException e;
+		
 		public LoginAsyncTaskLoader(Context context,LoginRequest loginRequest) {
 			super(context);
 			this.loginRequest = loginRequest;
@@ -212,7 +218,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			try {
 				return new API().login(loginRequest.login, loginRequest.pass);
 			} catch (ApiException apIexception) {
-				apIexception.printStackTrace();
+				e = apIexception;
 			}
 			return null;
 		}

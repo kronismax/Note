@@ -5,6 +5,8 @@ import note.api.API;
 import note.api.API.ChangePasswordResponse;
 import note.api.ApiException;
 import note.ui.login.MainActivity;
+import note.ui.login.RegistrationFragment.RegisterAsyncTaskLoader;
+import note.utils.UIUtils;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
@@ -70,6 +72,12 @@ public class ChangePasswordActivity extends Activity implements OnClickListener 
 			}
 			@Override
 			public void onLoadFinished(Loader<ChangePasswordResponse> loader, ChangePasswordResponse data) {
+				if (data == null) {
+					final ApiException apiException = ((ChangeUserPasswordLoader) loader).e;
+					if (apiException != null) {
+						UIUtils.showToastByException(ChangePasswordActivity.this, apiException);
+					}
+				}
 				Toast toast = Toast.makeText(ChangePasswordActivity.this, "Успех", Toast.LENGTH_LONG);
 				toast.setGravity(Gravity.BOTTOM, 10, 50);
 				toast.show();
@@ -84,7 +92,7 @@ public class ChangePasswordActivity extends Activity implements OnClickListener 
 		
 	public static class ChangeUserPasswordLoader extends AsyncTaskLoader<ChangePasswordResponse> {
 		ChangeUserPassword	changeUserPassword;
-
+		public ApiException e;
 		public ChangeUserPasswordLoader(Context context,ChangeUserPassword changeUserPassword) {
 			super(context);
 			this.changeUserPassword = changeUserPassword;
@@ -93,9 +101,9 @@ public class ChangePasswordActivity extends Activity implements OnClickListener 
 		@Override
 		public ChangePasswordResponse loadInBackground(){
 			try {
-				return API.getChangePassword(changeUserPassword.getSessionID(), changeUserPassword.getNewPassword(), changeUserPassword.getOldPassword());
-			} catch (ApiException e) {
-				e.printStackTrace();
+				return new API().getChangePassword(changeUserPassword.getSessionID(), changeUserPassword.getNewPassword(), changeUserPassword.getOldPassword());
+			} catch (ApiException apIexception) {
+				e = apIexception;
 			}
 			return null;
 		}

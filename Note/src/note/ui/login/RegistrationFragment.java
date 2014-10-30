@@ -3,6 +3,7 @@ package note.ui.login;
 import note.api.API;
 import note.api.ApiException;
 import note.api.API.RegisterResponse;
+import note.ui.login.LoginFragment.LoginAsyncTaskLoader;
 import note.utils.UIUtils;
 import android.app.Fragment;
 import android.app.LoaderManager;
@@ -29,7 +30,6 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	private EditText	PassText;
 	private EditText	RepeatPassText;
 	private Button		Registration;
-	API					api	= new API();
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance){
@@ -119,6 +119,12 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 
 		@Override
 		public void onLoadFinished(Loader<RegisterResponse> loader,RegisterResponse data) {
+			if (data == null) {
+				final ApiException apiException = ((RegisterAsyncTaskLoader) loader).e;
+				if (apiException != null) {
+					UIUtils.showToastByException(getActivity(), apiException);
+				}
+			}
 			if (data.result == 0) {
 				Toast toast = Toast.makeText(getActivity(), "Красава",Toast.LENGTH_LONG);
 				toast.setGravity(Gravity.BOTTOM, 10, 50);
@@ -141,7 +147,8 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 	public static class RegisterAsyncTaskLoader extends AsyncTaskLoader<RegisterResponse> {
 
 		public RegisterRequest	registerRequest;
-
+		public ApiException e;
+		
 		public RegisterAsyncTaskLoader(Context context,RegisterRequest registerRequest) {
 			super(context);
 			this.registerRequest = registerRequest;
@@ -152,7 +159,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 			try {
 				return new API().register(registerRequest.login, registerRequest.pass);
 			} catch (ApiException apIexception) {
-				apIexception.printStackTrace();
+				e = apIexception;
 			}
 			return null;
 		}

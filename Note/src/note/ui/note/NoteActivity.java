@@ -8,6 +8,7 @@ import note.api.API.NoteListResponse;
 import note.api.ApiException;
 import note.model.database.MyContentProvider;
 import note.model.database.NoteDatabaseColumns;
+import note.model.database.NoteDatabaseColumns.TableNote;
 import note.ui.login.MainActivity;
 import note.utils.UIUtils;
 import android.app.AlertDialog;
@@ -46,7 +47,6 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 	NoteAdapter	noteAdapter;
 	Button		buttonDelete;
 	ListView	lv;
-	static API			API			= new API();
 	// DBHelper	db;
 	String[]	myColumns	= { NoteDatabaseColumns.TableNote._ID, 
 								NoteDatabaseColumns.TableNote.TITLE, 
@@ -152,7 +152,6 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 				startActivity(intentChangePassword);
 				return true;
 			case R.id.action_logOut:
-				API = new API();
 				final Bundle bundle = new Bundle();
 				bundle.putString(KEY_FOR_BUNDLE, (((MyApplication) getApplication()).getLocalData().getSessionId()));
 				//new MyAsyncTask().execute(new LogOut(((MyApplication) getApplication()).getLocalData().getSessionId()));
@@ -339,7 +338,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 			try {
 				deleteNoteId = params[0];
 				Log.d("Note id doIn", ":" + deleteNoteId);
-				return API.deleteNote(params[0].sessionId, params[0].noteId);
+				return new API().deleteNote(params[0].sessionId, params[0].noteId);
 			} catch (ApiException e) {
 				apiexception = e;
 				e.printStackTrace();
@@ -382,7 +381,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args){
-		CursorLoader cursorLoader = new CursorLoader(this, MyContentProvider.URI_NOTE, myColumns, null, null, null);
+		CursorLoader cursorLoader = new CursorLoader(this, MyContentProvider.URI_NOTE, myColumns, null, null, TableNote._ID + " desc");
 		return cursorLoader;
 	}
 
@@ -421,7 +420,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		    // This method is called on a background thread and should generate a
 		    // new set of data to be delivered back to the client.
 			try {
-				return API.getNotesList(sessionID);
+				return new API().getNotesList(sessionID);
 			} catch (ApiException apIexception) {
 				apIexception.printStackTrace();
 			}
@@ -486,7 +485,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		@Override
 		public LogOutResponse loadInBackground(){
 			try {
-				return API.logOut(this.sessionID);
+				return new API().logOut(this.sessionID);
 			} catch (ApiException apIexception) {
 				apIexception.printStackTrace();
 			}
@@ -497,22 +496,15 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 	private String DELETE_KEY_FOR_BUNDLE = "DELETE_KEY_FOR_BUNDLE";
 	public LoaderManager.LoaderCallbacks<DeleteNoteResponse> deleteNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<DeleteNoteResponse>() {
 
-		public DeleteRequest request;
 
 		@Override
 		public Loader<DeleteNoteResponse> onCreateLoader(int id, Bundle args) {
-			request = (DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE);
-			Log.d("DelrequesteteRequest", "request: " + request);
-			return new DeleteLoader(NoteActivity.this,
-					(DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE));
+			return new DeleteLoader(NoteActivity.this,(DeleteRequest) args.getParcelable(DELETE_KEY_FOR_BUNDLE));
 		}
 
 		@Override
-		public void onLoadFinished(Loader<DeleteNoteResponse> loader,
-				DeleteNoteResponse data) {
-			getContentResolver().delete(MyContentProvider.URI_NOTE,
-					NoteDatabaseColumns.TableNote._ID + " = " + request.noteId,
-					null);
+		public void onLoadFinished(Loader<DeleteNoteResponse> loader,DeleteNoteResponse data) {
+			getContentResolver().delete(MyContentProvider.URI_NOTE,NoteDatabaseColumns.TableNote._ID + " = " + ((DeleteLoader)loader).deleteRequest.noteId , null);
 		}
 
 		@Override
@@ -530,12 +522,11 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 
         @Override
         public DeleteNoteResponse loadInBackground() {
+        	ApiException e;
             try {
-                Log.d("loadInBackground", "deleteRequest" + deleteRequest);
-                return API.deleteNote(deleteRequest.sessionID, deleteRequest.noteId);
-
+                return new API().deleteNote(deleteRequest.sessionID, deleteRequest.noteId);
             } catch (ApiException apIexception) {
-				apIexception.printStackTrace();
+            	e = apIexception;
 			}
 			return null;
         }
@@ -579,8 +570,4 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 			dest.writeLong(noteId);
 		}
 	}
-    
-    
-    
-    
 }

@@ -39,7 +39,6 @@ import com.example.note.R;
 
 public class NewNoteActivity extends Activity implements View.OnClickListener {
 
-	protected static API			API;
 	protected EditText				textNote;
 	protected EditText				titleNote;
 	protected Button				randomNotes;
@@ -59,7 +58,6 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 		super.onCreate(savedInstanceState);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.new_note_activity);
-		API = new API();
 
 		textNote = (EditText) findViewById(R.id.textNote);
 		titleNote = (EditText) findViewById(R.id.titleNote);
@@ -138,19 +136,17 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 	}
 	
 	public LoaderManager.LoaderCallbacks<NewNoteResponse> createNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<NewNoteResponse>() {
-        NoteCreate request;
         
         @Override
         public Loader<NewNoteResponse> onCreateLoader(int id, Bundle args) {
-        	request = args.getParcelable(KEY_FOR_NOTE_CREATE);
             return new NoteCreateLoader(NewNoteActivity.this, (NoteCreate) args.getParcelable(KEY_FOR_NOTE_CREATE));
         }
 
         @Override
         public void onLoadFinished(Loader<NewNoteResponse> loader, NewNoteResponse data) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(NoteDatabaseColumns.TableNote.TITLE, request.title);
-            contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, request.content);
+            contentValues.put(NoteDatabaseColumns.TableNote.TITLE, ((NoteCreateLoader)loader).noteCreate.title);
+            contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, ((NoteCreateLoader)loader).noteCreate.title);
             contentValues.put(NoteDatabaseColumns.TableNote._ID, data.getNoteID());
             getContentResolver().insert(MyContentProvider.URI_NOTE, contentValues);
             Intent intentLogOut = new Intent(NewNoteActivity.this, NoteActivity.class);
@@ -176,7 +172,7 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 		@Override
 		public NewNoteResponse loadInBackground() {
 			try {
-				return API.newNote(noteCreate.sessionID, noteCreate.title, noteCreate.content);
+				return new API().newNote(noteCreate.sessionID, noteCreate.title, noteCreate.content);
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}

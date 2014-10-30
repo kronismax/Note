@@ -44,6 +44,7 @@ public class EditNoteActivity extends Activity {
 	ContentValues					contentValues	= new ContentValues();
 	Cursor							c;
 	private final String			GET_NOTE_KEY	= "GET_NOTE_KEY";
+	private final String 			EDIT_NOTE_KEY   = "EDIT_NOTE_KEY";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -96,13 +97,11 @@ public class EditNoteActivity extends Activity {
 	public LoaderManager.LoaderCallbacks<GetNoteResponse> getNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<GetNoteResponse>() {
 		@Override
 		public Loader<GetNoteResponse> onCreateLoader(int id, Bundle args) {
-			return new GetNoteLoader(EditNoteActivity.this,
-					(GetNote) args.getParcelable(GET_NOTE_KEY));
+			return new GetNoteLoader(EditNoteActivity.this,(GetNote) args.getParcelable(GET_NOTE_KEY));
 		}
 
 		@Override
-		public void onLoadFinished(Loader<GetNoteResponse> loader,
-				GetNoteResponse data) {
+		public void onLoadFinished(Loader<GetNoteResponse> loader, GetNoteResponse data) {
 			getActionBar().setTitle(data.getTitle());
 			editNote.setText(data.getContent());
 		}
@@ -112,13 +111,11 @@ public class EditNoteActivity extends Activity {
 
 		}
 	};
-	    private final String EDIT_NOTE_KEY = "EDIT_NOTE_KEY";
+	    
 	    public LoaderManager.LoaderCallbacks<EditNoteResponse> editNoteResponseLoaderCallbacks = new LoaderManager.LoaderCallbacks<EditNoteResponse>() {
-	        EditNote request;
 
 	        @Override
 	        public Loader<EditNoteResponse> onCreateLoader(int id, Bundle args) {
-	            request = (EditNote) args.getParcelable(EDIT_NOTE_KEY);
 	            return new EditNoteLoader(EditNoteActivity.this, (EditNote) args.getParcelable(EDIT_NOTE_KEY));
 	        }
 
@@ -126,10 +123,10 @@ public class EditNoteActivity extends Activity {
 	        public void onLoadFinished(Loader<EditNoteResponse> loader, EditNoteResponse data) {
 
 	            ContentValues contentValues = new ContentValues();
-	            contentValues.put(NoteDatabaseColumns.TableNote._ID, request.getNoteID());
-	            contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, request.text);
+	            contentValues.put(NoteDatabaseColumns.TableNote._ID, ((EditNoteLoader) loader).editNote.noteID);
+	            contentValues.put(NoteDatabaseColumns.TableNote.CONTENT, ((EditNoteLoader) loader).editNote.text);
 	            
-	            getContentResolver().update(MyContentProvider.URI_NOTE, contentValues, NoteDatabaseColumns.TableNote._ID + " = " + request.getNoteID(), null);
+	            getContentResolver().update(MyContentProvider.URI_NOTE, contentValues, NoteDatabaseColumns.TableNote._ID + " = " + ((EditNoteLoader) loader).editNote.noteID, null);
 	            
 	            Toast toast = Toast.makeText(EditNoteActivity.this, "Успех", Toast.LENGTH_LONG);
 	            toast.setGravity(Gravity.BOTTOM, 10, 50);
@@ -138,7 +135,6 @@ public class EditNoteActivity extends Activity {
 
 	        @Override
 	        public void onLoaderReset(Loader<EditNoteResponse> loader) {
-
 	        }
 	    };
 	    
@@ -153,7 +149,7 @@ public class EditNoteActivity extends Activity {
 		@Override
 		public API.GetNoteResponse loadInBackground(){
 			try {
-				return API.getNote(getNote.getSessionID(), getNote.getNoteID());
+				return new API().getNote(getNote.getSessionID(), getNote.getNoteID());
 			} catch (ApiException apIexception) {
 				apIexception.printStackTrace();
 			}
@@ -163,9 +159,9 @@ public class EditNoteActivity extends Activity {
 
 	public static class EditNoteLoader extends AsyncTaskLoader<EditNoteResponse> {
 
-		EditNote	editNote;
+		public EditNote	editNote;
 
-		public EditNoteLoader(Context context,EditNote editNote) {
+		public EditNoteLoader(Context context, EditNote editNote) {
 			super(context);
 
 			this.editNote = editNote;
@@ -174,7 +170,7 @@ public class EditNoteActivity extends Activity {
 		@Override
 		public EditNoteResponse loadInBackground(){
 			try {
-				return API.getEditNote(editNote.sessionID, editNote.noteID, editNote.text);
+				return new API().getEditNote(editNote.sessionID, editNote.noteID, editNote.text);
 			} catch (ApiException apIexception) {
 				apIexception.printStackTrace();
 			}

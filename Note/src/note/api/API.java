@@ -79,9 +79,8 @@ public class API {
 				sessionID = obj.getString("sessionID");
 				result = obj.getInt("result");
 			} catch (JSONException e) {
-				throw new ApiException(ApiException.TypeOfError.ERROR_JSON, e);
+				throw new ApiException(TypeOfError.ERROR_WRONG_DATA, e);
 			}
-
 		}
 
 		public int getUserCreate(){
@@ -103,12 +102,24 @@ public class API {
         try {
             response = new LoginResponse(new JSONObject(rawResponse));
         } catch (JSONException e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
         }
         return response;
 	}
 
 ///////////////////////           REGISTRATION         /////////////////////////////////////
+
+	public static class RegisterResponse {
+		public int result;
+
+		public RegisterResponse(JSONObject obj) throws ApiException {
+			try {
+				result = obj.getInt("result");
+			} catch (JSONException e) {
+				throw new ApiException(TypeOfError.ERROR_WRONG_DATA, e);
+			}
+		}
+	}
 	
 	public RegisterResponse register(String login, String password) throws ApiException{
 
@@ -120,22 +131,9 @@ public class API {
         try {
             response = new RegisterResponse(new JSONObject(rawResponse));
         } catch (JSONException e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
         }
         return response;
-	}
-
-
-	public static class RegisterResponse {
-		public int result;
-
-		public RegisterResponse(JSONObject obj) throws ApiException {
-			try {
-				result = obj.getInt("result");
-			} catch (JSONException e) {
-				throw new ApiException(ApiException.TypeOfError.ERROR_JSON, e);
-			}
-		}
 	}
 
 ///////////////////////           CHANGE PASSWORD         /////////////////////////////////////
@@ -147,12 +145,12 @@ public class API {
 			try {
 				result = obj.getInt("result");
 			} catch (JSONException e) {
-				e.printStackTrace();
+				throw new ApiException(TypeOfError.ERROR_WRONG_DATA, e);
 			}
 		}
 	}
 
-	public static ChangePasswordResponse getChangePassword(String sessionID, String newPassword, String oldPassword) throws ApiException{
+	public ChangePasswordResponse getChangePassword(String sessionID, String newPassword, String oldPassword) throws ApiException{
 		String rawResponse = GET(createUrlBuilder().appendPath("changePassword")
                 .appendQueryParameter("sessionID", sessionID)
                 .appendQueryParameter("newPass", newPassword)
@@ -162,31 +160,33 @@ public class API {
 		try {
 			response = new ChangePasswordResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
 		}
 		return response;
 	}
 
 	/////////////////////////           LOG OUT         ////////////////////////////////////////
 	
-	public class LogOutResponse {
+	public static class LogOutResponse {
 		public int	result;
 		public LogOutResponse(JSONObject obj) throws ApiException {
 			try {
 				result = obj.getInt("result");
 			} catch (JSONException e) {
-				e.printStackTrace();
+				throw new ApiException(TypeOfError.ERROR_WRONG_DATA, e);
 			}
 		}
 	}
 
 	public LogOutResponse logOut(String ID) throws ApiException{
-		String rawResponse = GET(createUrlBuilder().appendPath("logout").appendQueryParameter("sessionID", ID).toString());
+		String rawResponse = GET(createUrlBuilder().appendPath("logout")
+				.appendQueryParameter("sessionID", ID)
+				.toString());
 		LogOutResponse response = null;
 		try {
 			response = new LogOutResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
 		}
 		return response;
 	}
@@ -224,7 +224,7 @@ public class API {
         try {
             response = new NewNoteResponse(new JSONObject(rawResponse));
         } catch (JSONException e) {
-			throw new ApiException(TypeOfError.ERROR_JSON, e);
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
         }
         return response;
     }
@@ -243,8 +243,6 @@ public class API {
 			this.noteID = obj.getLong("noteID");
 		}
 	}
-
-	ArrayList<NoteResponse>	notes;
 
 	public static class NoteListResponse {
 
@@ -271,7 +269,7 @@ public class API {
 		try {
 			response = new NoteListResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
 		}
 		return response;
 
@@ -292,7 +290,7 @@ public class API {
 				title = obj.getString("title");
 				content = obj.getString("content");
 			} catch (JSONException e) {
-				e.printStackTrace();
+				throw new ApiException(TypeOfError.ERROR_WRONG_DATA, e);
 			}
 
 		}
@@ -310,7 +308,7 @@ public class API {
 		}
 	}
 
-	public static GetNoteResponse getNote(String sessionID, long noteID) throws ApiException{
+	public GetNoteResponse getNote(String sessionID, long noteID) throws ApiException{
         String rawResponse = GET(createUrlBuilder().appendPath("getNote")
                 .appendQueryParameter("sessionID", sessionID)
                 .appendQueryParameter("noteID", Long.toString(noteID))
@@ -319,22 +317,23 @@ public class API {
         try {
             response = new GetNoteResponse(new JSONObject(rawResponse));
         } catch (JSONException e) {
-            e.printStackTrace();
+        	throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
         }
         return response;
     }
-
+	
+//////////////////////////////////         EDIT NOTE       /////////////////////////
+	
 	public static class EditNoteResponse {
 
 		public int	result;
 
 		public EditNoteResponse(JSONObject obj) throws JSONException {
 			result = obj.getInt("result");
-
 		}
 	}
 
-	public static EditNoteResponse getEditNote(String sessionID, long noteID, String text) throws ApiException{
+	public EditNoteResponse getEditNote(String sessionID, long noteID, String text) throws ApiException{
         String rawResponse = GET(createUrlBuilder().appendPath("editNote")
                 .appendQueryParameter("sessionID", sessionID)
                 .appendQueryParameter("noteID", String.valueOf(noteID))
@@ -344,7 +343,7 @@ public class API {
 		try {
 			response = new EditNoteResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
 		}
 		return response;
 	}
@@ -370,7 +369,7 @@ public class API {
 		try {
 			response = new DeleteNoteResponse(new JSONObject(rawResponse));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			throw new ApiException(TypeOfError.ERROR_PARSE_RESPONSE, e);
 		}
 		return response;
 	}

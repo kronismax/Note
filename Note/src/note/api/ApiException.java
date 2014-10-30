@@ -3,7 +3,7 @@ package note.api;
 public class ApiException extends Exception {
 
 	public enum TypeOfError {
-		ERROR_CONNECTION, ERROR_JSON, ERROR
+		ERROR_CONNECTION, ERROR_PARSE_RESPONSE, ERROR_WRONG_DATA
 	};
 
 	static TypeOfError	typeOfError;
@@ -16,5 +16,5 @@ public class ApiException extends Exception {
 		super(throwable);
 		this.typeOfError = typeOfError;
 	}
-
+	
 }

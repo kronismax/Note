@@ -12,14 +12,14 @@ public final class UIUtils {
 	public static void showToastByException(Context context, ApiException e) {
 		e.printStackTrace();
 		switch (e.getError()) {
-		case ERROR:
-			Toast.makeText(context, "ERROR", Toast.LENGTH_SHORT).show();
-			break;
 		case ERROR_CONNECTION:
 			Toast.makeText(context, "ERROR_CONNECTION", Toast.LENGTH_SHORT).show();
 			break;
-		case ERROR_JSON:
-			Toast.makeText(context, "ERROR_JSON", Toast.LENGTH_SHORT).show();
+		case ERROR_PARSE_RESPONSE:
+			Toast.makeText(context, "ERROR_PARSE_RESPONSE", Toast.LENGTH_SHORT).show();
+			break;
+		case ERROR_WRONG_DATA:
+			Toast.makeText(context, "ERROR_WRONG_DATA", Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
