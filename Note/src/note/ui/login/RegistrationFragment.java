@@ -43,7 +43,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 		LogText = (EditText) view.findViewById(R.id.logText);
 		PassText = (EditText) view.findViewById(R.id.passText);
 		RepeatPassText = (EditText) view.findViewById(R.id.repeatPassText);
-		Registration = (Button) view.findViewById(R.id.button1);
+		Registration = (Button) view.findViewById(R.id.button_login);
 		Registration.setOnClickListener(this);
 
 	}

@@ -7,8 +7,10 @@ import note.api.ApiException;
 import note.model.database.MyContentProvider;
 import note.ui.note.NoteActivity;
 import note.utils.UIUtils;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
@@ -32,12 +34,15 @@ import com.example.note.R;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
-	private EditText			LogText;
-	private EditText			PassText;
+	private EditText			eLogin;
+	private EditText			ePassword;
 	private Button				Login;
 	private Button				Demo;
 	private static final String	PREF_SETTINGS	= "Settings";
 	private final String KEY_FOR_LOGIN = "KEY_FOR_LOGIN";
+	ProgressDialog mProgressDialog;
+	Bundle loginBundle = new Bundle();
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance){
 		return inflater.inflate(R.layout.log_frag, container, false);
@@ -46,18 +51,18 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	@Override
 	public void onViewCreated(View view, Bundle saveInstanceState){
 		super.onViewCreated(view, saveInstanceState);
-		LogText = (EditText) view.findViewById(R.id.logText);
-		PassText = (EditText) view.findViewById(R.id.passText);
-		Login = (Button) view.findViewById(R.id.button1);
+		eLogin = (EditText) view.findViewById(R.id.logText);
+		ePassword = (EditText) view.findViewById(R.id.passText);
+		Login = (Button) view.findViewById(R.id.button_login);
 		Demo = (Button) view.findViewById(R.id.ButtonDemo);
 		if (saveInstanceState == null) {
 			SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
 			String stringPreference = preferences.getString("login", "");
-			LogText.setText(stringPreference);
-			if (!TextUtils.isEmpty(LogText.getText())) {
-				PassText.requestFocus();
+			eLogin.setText(stringPreference);
+			if (!TextUtils.isEmpty(eLogin.getText())) {
+				ePassword.requestFocus();
 			} else {
-				LogText.requestFocus();
+				eLogin.requestFocus();
 			}
 		}
 		Login.setOnClickListener(this);
@@ -68,8 +73,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 		switch (arg0.getId()) {
 			case R.id.ButtonDemo:
-				if (!TextUtils.isEmpty(LogText.getText())) {
-					final String LOGIN = LogText.getText().toString();
+				if (!TextUtils.isEmpty(eLogin.getText())) {
+					final String LOGIN = eLogin.getText().toString();
 					final String PASS = LOGIN;
 					Toast toast = Toast.makeText(getActivity(), "" + LOGIN, Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
@@ -80,38 +85,60 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					LoginRequest loginRequest = new LoginRequest(LOGIN, PASS);
 					loginBundle.putParcelable(KEY_FOR_LOGIN, loginRequest);
 					getLoaderManager().initLoader(1, loginBundle, loginResponseLoaderCallbacks).forceLoad();
-
 				} else {
 					LoginRequest request = new LoginRequest("q", "q");
-					LogText.setText("q");
+					eLogin.setText("q");
 					Toast toast = Toast.makeText(getActivity(), "      q", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 					Login.setEnabled(false);
 				}
 				break;
-			case R.id.button1:
-				final String LOGIN = LogText.getText().toString();
-				final String PASS = PassText.getText().toString();
+			case R.id.button_login:
+				final String LOGIN = eLogin.getText().toString();
+				final String PASS = ePassword.getText().toString();
 				Log.d("Разве логин", "?");
 				if (LOGIN.isEmpty() || PASS.isEmpty()) {
 					Toast toast = Toast.makeText(getActivity(), "Введите логин или пароль", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				} else {
-					Bundle loginBundle = new Bundle();
 					LoginRequest loginRequest = new LoginRequest(LOGIN, PASS);
 					loginBundle.putParcelable(KEY_FOR_LOGIN, loginRequest);
-					getLoaderManager().initLoader(1, loginBundle, loginResponseLoaderCallbacks).forceLoad();
-
+					
 					Login.setEnabled(false);
-				}
-				break;
+					Log.d("launchRingDialog", "before");
+					launchRingDialog(arg0);
+//					mProgressDialog = new ProgressDialog(getActivity());
+//					mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL); // устанавливаем стиль
+//					mProgressDialog.setMessage("Загружаю. Подождите...");  // задаем текст
+//					mProgressDialog.setProgress(0);
+//					mProgressDialog.setMax(20);
+//					mProgressDialog.show();
+
+			}
 		}
 	}
-
+				public void launchRingDialog(View view) {
+					Log.d("launchRingDialog", "start");
+			        final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), "Please wait ...", "Downloading Image ...", true);
+			        ringProgressDialog.setCancelable(true);
+			        new Thread(new Runnable() {
+			            @Override
+			            public void run() {
+			                try {
+			                    // Here you should write your time consuming task...
+			                    // Let the progress ring for 10 seconds...
+			                    Thread.sleep(1000);
+			                    getLoaderManager().initLoader(1, loginBundle, loginResponseLoaderCallbacks).forceLoad();
+			                } catch (Exception e) {
+			                }
+			                ringProgressDialog.dismiss();
+			            }
+			        }).start();
+}
 	private void saveLastLogin(){
-		final String LOGIN = LogText.getText().toString();
+		final String LOGIN = eLogin.getText().toString();
 		SharedPreferences.Editor editor = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE).edit();
 		editor.putString("login", LOGIN);
 		editor.commit();
@@ -182,7 +209,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 				SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS,Context.MODE_PRIVATE);
 				String stringPreference = preferences.getString("login", "");
-				if (!TextUtils.isEmpty(stringPreference)&& !(stringPreference.equals(LogText.getText().toString()))) {
+				if (!TextUtils.isEmpty(stringPreference)&& !(stringPreference.equals(eLogin.getText().toString()))) {
 					getActivity().getContentResolver().delete(MyContentProvider.URI_NOTE, null, null);
 				}
 				saveLastLogin();

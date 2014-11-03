@@ -61,7 +61,7 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 
 		textNote = (EditText) findViewById(R.id.textNote);
 		titleNote = (EditText) findViewById(R.id.titleNote);
-		randomNotes = (Button) findViewById(R.id.button1);
+		randomNotes = (Button) findViewById(R.id.button_login);
 		randomNotes.setOnClickListener(this);
 		intent = getIntent();
 
@@ -125,7 +125,7 @@ public class NewNoteActivity extends Activity implements View.OnClickListener {
 	@Override
 	public void onClick(View arg0){
 		switch (arg0.getId()) {
-			case R.id.button1:
+			case R.id.button_login:
 				Bundle bundle = new Bundle();
 				for (int i = 1; i < 6; i++) {
 					bundle.putParcelable(KEY_FOR_NOTE_CREATE, new NoteCreate(((MyApplication) getApplication()).getLocalData().getSessionId(), "" + i, "generated"));
