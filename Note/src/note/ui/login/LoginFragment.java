@@ -107,9 +107,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
 		toast.setGravity(Gravity.BOTTOM, 10, 50);
 		toast.show();
+		
 		LoginRequest loginRequest = new LoginRequest(login, pass);
 		loginBundle.putParcelable(KEY_FOR_LOGIN, loginRequest);
+		
 		Login.setEnabled(false);
+		
 		launchRingDialog(arg0);
 	}
 	
@@ -130,6 +133,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 			}
 		}).start();
 	}
+	
 	private void saveLastLogin(){
 		final String LOGIN = eLogin.getText().toString();
 		SharedPreferences.Editor editor = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE).edit();

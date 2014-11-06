@@ -1,11 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customfont="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:padding="6dp" >
 
-    <Button
+    <note.views.MyButton
         android:id="@+id/button_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,13 +18,15 @@
         android:height="45dp"
         android:minHeight="40dp"
         android:minWidth="50dp"
-        android:text="Войти"
+        android:text="Log in"
         android:textColor="@android:color/white"
         android:textSize="20sp"
         android:textStyle="italic"
-        android:width="320dp" />
+        android:typeface="sans"
+        android:width="320dp"
+        customfont:fontName="CANON.ttf" />
 
-    <Button
+    <note.views.MyButton
         android:id="@+id/ButtonDemo"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
@@ -35,7 +38,8 @@
         android:minHeight="40dp"
         android:minWidth="50dp"
         android:text="Demo"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        customfont:fontName="CANON.ttf" />
 
     <EditText
         android:id="@+id/logText"
@@ -74,16 +78,15 @@
         <requestFocus />
     </EditText>
 
-    <TextView
+    <note.views.MyTextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/logText"
         android:layout_alignParentTop="true"
         android:layout_marginTop="50dp"
-        android:text=" Введите логин и пароль"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text=" Enter login"
         android:textSize="20sp"
-        android:textStyle="italic" />
+        customfont:fontName="CANON.ttf" />
 
 </RelativeLayout>
