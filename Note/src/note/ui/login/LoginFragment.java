@@ -7,7 +7,6 @@ import note.api.ApiException;
 import note.model.database.MyContentProvider;
 import note.ui.note.NoteActivity;
 import note.utils.UIUtils;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.app.ProgressDialog;
@@ -16,7 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.note.R;
@@ -38,6 +38,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	private EditText			ePassword;
 	private Button				Login;
 	private Button				Demo;
+	private TextView textView1;
 	private static final String	PREF_SETTINGS	= "Settings";
 	private final String KEY_FOR_LOGIN = "KEY_FOR_LOGIN";
 	ProgressDialog mProgressDialog;
@@ -55,6 +56,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		ePassword = (EditText) view.findViewById(R.id.passText);
 		Login = (Button) view.findViewById(R.id.button_login);
 		Demo = (Button) view.findViewById(R.id.ButtonDemo);
+		textView1= (TextView) view.findViewById(R.id.textView1);
+		
+		String fontShortcuts = "fonts/CANON.ttf";
+		Typeface font = Typeface.createFromAsset(getActivity().getAssets(), fontShortcuts);
+		Demo.setTypeface(font);
+		
 		if (saveInstanceState == null) {
 			SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
 			String stringPreference = preferences.getString("login", "");
@@ -76,22 +83,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 				if (!TextUtils.isEmpty(eLogin.getText())) {
 					final String LOGIN = eLogin.getText().toString();
 					final String PASS = LOGIN;
-					Toast toast = Toast.makeText(getActivity(), "" + LOGIN, Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.BOTTOM, 10, 50);
-					toast.show();
-
-					Login.setEnabled(false);
-					Bundle loginBundle = new Bundle();
-					LoginRequest loginRequest = new LoginRequest(LOGIN, PASS);
-					loginBundle.putParcelable(KEY_FOR_LOGIN, loginRequest);
-					getLoaderManager().initLoader(1, loginBundle, loginResponseLoaderCallbacks).forceLoad();
+					login(LOGIN, LOGIN, PASS, arg0);					
 				} else {
-					LoginRequest request = new LoginRequest("q", "q");
-					eLogin.setText("q");
-					Toast toast = Toast.makeText(getActivity(), "      q", Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.BOTTOM, 10, 50);
-					toast.show();
-					Login.setEnabled(false);
+					String loginQ = "q";
+					login(loginQ, loginQ, loginQ, arg0);
 				}
 				break;
 			case R.id.button_login:
@@ -103,40 +98,38 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 					toast.setGravity(Gravity.BOTTOM, 10, 50);
 					toast.show();
 				} else {
-					LoginRequest loginRequest = new LoginRequest(LOGIN, PASS);
-					loginBundle.putParcelable(KEY_FOR_LOGIN, loginRequest);
-					
-					Login.setEnabled(false);
-					Log.d("launchRingDialog", "before");
-					launchRingDialog(arg0);
-//					mProgressDialog = new ProgressDialog(getActivity());
-//					mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL); // устанавливаем стиль
-//					mProgressDialog.setMessage("Загружаю. Подождите...");  // задаем текст
-//					mProgressDialog.setProgress(0);
-//					mProgressDialog.setMax(20);
-//					mProgressDialog.show();
-
+					login("Красава", LOGIN, PASS, arg0);
 			}
 		}
 	}
-				public void launchRingDialog(View view) {
-					Log.d("launchRingDialog", "start");
-			        final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), "Please wait ...", "Downloading Image ...", true);
-			        ringProgressDialog.setCancelable(true);
-			        new Thread(new Runnable() {
-			            @Override
-			            public void run() {
-			                try {
-			                    // Here you should write your time consuming task...
-			                    // Let the progress ring for 10 seconds...
-			                    Thread.sleep(1000);
-			                    getLoaderManager().initLoader(1, loginBundle, loginResponseLoaderCallbacks).forceLoad();
-			                } catch (Exception e) {
-			                }
-			                ringProgressDialog.dismiss();
-			            }
-			        }).start();
-}
+	
+	public void login(String toastText, String login, String pass, View arg0) {
+		Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 10, 50);
+		toast.show();
+		LoginRequest loginRequest = new LoginRequest(login, pass);
+		loginBundle.putParcelable(KEY_FOR_LOGIN, loginRequest);
+		Login.setEnabled(false);
+		launchRingDialog(arg0);
+	}
+	
+	public void launchRingDialog(View view){
+		final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), "Please wait ...", "Downloading ...", true);
+		ringProgressDialog.setCancelable(true);
+		new Thread(new Runnable() {
+
+			@Override
+			public void run(){
+				try {
+					// Here you should write your time consuming task... let the progress ring for 10 seconds...
+					Thread.sleep(500);
+					getLoaderManager().initLoader(1, loginBundle, loginResponseLoaderCallbacks).forceLoad();
+				} catch (Exception e) {
+				}
+				ringProgressDialog.dismiss();
+			}
+		}).start();
+	}
 	private void saveLastLogin(){
 		final String LOGIN = eLogin.getText().toString();
 		SharedPreferences.Editor editor = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE).edit();
@@ -233,8 +226,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 	public static class LoginAsyncTaskLoader extends AsyncTaskLoader<LoginResponse> {
 
 		public LoginRequest	loginRequest;
-		public ApiException e;
-		
+		public ApiException	e;
+
 		public LoginAsyncTaskLoader(Context context,LoginRequest loginRequest) {
 			super(context);
 			this.loginRequest = loginRequest;

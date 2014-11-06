@@ -13,6 +13,7 @@ import note.ui.login.MainActivity;
 import note.utils.UIUtils;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
@@ -155,7 +156,7 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 				final Bundle bundle = new Bundle();
 				bundle.putString(KEY_FOR_BUNDLE, (((MyApplication) getApplication()).getLocalData().getSessionId()));
 				//new MyAsyncTask().execute(new LogOut(((MyApplication) getApplication()).getLocalData().getSessionId()));
-				getLoaderManager().initLoader(3, bundle, logoutResponseLoaderCallbacks).forceLoad();
+				launchRingDialog(bundle);
 				return true;
 			case R.id.action_add:
 				Intent intentAdd = new Intent(this, NewNoteActivity.class);
@@ -169,6 +170,25 @@ public class NoteActivity extends FragmentActivity implements LoaderCallbacks<Cu
 		}
 	}
 
+	public void launchRingDialog(final Bundle bundle){
+		Log.d("launchRingDialog", "start");
+		final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...", "Downloading ...", true);
+		ringProgressDialog.setCancelable(true);
+		new Thread(new Runnable() {
+
+			@Override
+			public void run(){
+				try {
+					// Here you should write your time consuming task...
+					// Let the progress ring for 10 seconds...
+					Thread.sleep(500);
+					getLoaderManager().initLoader(3, bundle, logoutResponseLoaderCallbacks).forceLoad();
+				} catch (Exception e) {
+				}
+				ringProgressDialog.dismiss();
+			}
+		}).start();
+	}
 	public class LogOut {
 
 		private String	sessionID;
