@@ -58,9 +58,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 		Demo = (Button) view.findViewById(R.id.ButtonDemo);
 		textView1= (TextView) view.findViewById(R.id.textView1);
 		
-		String fontShortcuts = "fonts/CANON.ttf";
-		Typeface font = Typeface.createFromAsset(getActivity().getAssets(), fontShortcuts);
-		Demo.setTypeface(font);
+//		String fontShortcuts = "fonts/CANON.ttf";
+//		Typeface font = Typeface.createFromAsset(getActivity().getAssets(), fontShortcuts);
+//		Demo.setTypeface(font);
 		
 		if (saveInstanceState == null) {
 			SharedPreferences preferences = getActivity().getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);

@@ -18,13 +18,13 @@
         android:height="45dp"
         android:minHeight="40dp"
         android:minWidth="50dp"
-        android:text="Log in"
+        android:text="Логин"
         android:textColor="@android:color/white"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textStyle="italic"
         android:typeface="sans"
         android:width="320dp"
-        customfont:fontName="CANON.ttf" />
+        customfont:fontName="Nautilus.otf" />
 
     <note.views.MyButton
         android:id="@+id/ButtonDemo"
@@ -39,7 +39,8 @@
         android:minWidth="50dp"
         android:text="Demo"
         android:textColor="@android:color/white"
-        customfont:fontName="CANON.ttf" />
+        android:textSize="24sp"
+        customfont:fontName="Nautilus.otf" />
 
     <EditText
         android:id="@+id/logText"
@@ -85,8 +86,8 @@
         android:layout_alignLeft="@+id/logText"
         android:layout_alignParentTop="true"
         android:layout_marginTop="50dp"
-        android:text=" Enter login"
-        android:textSize="20sp"
-        customfont:fontName="CANON.ttf" />
+        android:text=" Введите логин и пароль"
+        android:textSize="24sp"
+        customfont:fontName="Nautilus.otf" />
 
 </RelativeLayout>
